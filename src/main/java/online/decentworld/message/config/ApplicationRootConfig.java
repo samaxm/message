@@ -1,15 +1,16 @@
 package online.decentworld.message.config;
 
-import com.lmax.disruptor.EventHandler;
 import com.lmax.disruptor.RingBuffer;
 import com.lmax.disruptor.dsl.Disruptor;
-import online.decentworld.message.core.MessageEvent;
+import online.decentworld.message.core.handlers.*;
+import online.decentworld.message.core.MessageReceiveEvent;
+import online.decentworld.message.security.DemoValidateStrategy;
+import online.decentworld.message.security.ValidateStrategy;
 import online.decentworld.rdb.config.DBConfig;
-import online.decentworld.rpc.dto.message.BaseMessage;
+import online.decentworld.rpc.codc.Codec;
+import online.decentworld.rpc.codc.protos.SimpleProtosCodec;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.*;
 import org.springframework.context.annotation.ComponentScan.Filter;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
@@ -36,7 +37,8 @@ public class ApplicationRootConfig {
 	@SuppressWarnings("unused")
 	private static Logger logger=LoggerFactory.getLogger(ApplicationRootConfig.class);
 	@Resource(name = "messageDisruptor")
-	private Disruptor<MessageEvent> disruptor;
+	private Disruptor<MessageReceiveEvent> disruptor;
+
 
 	@Bean
 	public DataSourceTransactionManager getTXManager(DataSource ds){
@@ -46,23 +48,34 @@ public class ApplicationRootConfig {
 	}
 
 	@Bean(name = "messageDisruptor")
-	public Disruptor<MessageEvent> getDisruptor(){
+	public Disruptor<MessageReceiveEvent> getDisruptor(){
 		Executor executor= Executors.newCachedThreadPool();
-		Disruptor<MessageEvent> disruptor=new Disruptor<MessageEvent>(MessageEvent::new,1024,executor);
-		disruptor.handleEventsWith(new EventHandler<MessageEvent>() {
-			@Override
-			public void onEvent(MessageEvent messageEvent, long l, boolean b) throws Exception {
-
-			}
-		});
+		Disruptor<MessageReceiveEvent> disruptor=new Disruptor<MessageReceiveEvent>(MessageReceiveEvent::new,1024,executor);
+		disruptor.handleEventsWith(new ValidateMessageHandler (new DemoValidateStrategy()))
+				.then(new LogHandler())
+				.thenHandleEventsWithWorkerPool(ChargeHandler.createGroup(4))
+				.thenHandleEventsWithWorkerPool(PersistenceHandler.createGroup(4))
+				.thenHandleEventsWithWorkerPool(DeliverHandler.createGroup(2))
+				.then(new CleanHandler());
 		disruptor.start();
 		return disruptor;
 	}
 
 	@Bean(name = "messageRingBuffer")
-	public RingBuffer<MessageEvent> messageEventRingBuffer(){
+	public RingBuffer<MessageReceiveEvent> messageEventRingBuffer(){
 		return disruptor.getRingBuffer();
 	}
+
+	@Bean(name = "protosCodec")
+	public Codec getCodec(){
+		return new SimpleProtosCodec();
+	}
+
+	@Bean
+	public ValidateStrategy getValidateStrategy(){
+		return new DemoValidateStrategy();
+	}
+
 
 
 }
