@@ -1,4 +1,4 @@
-package online.decentworld.message.security;
+package online.decentworld.message.security.validate;
 
 import online.decentworld.message.core.ValidateInfo;
 

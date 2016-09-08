@@ -1,4 +1,4 @@
-package online.decentworld.message.core;
+package online.decentworld.message.security.validate;
 
 /**
  * Created by Sammax on 2016/9/7.
@@ -16,7 +16,8 @@ public class HttpSimpleValidateInfo implements ValidateInfo {
         this.token = token;
     }
 
-    public HttpSimpleValidateInfo(String token) {
+    public HttpSimpleValidateInfo(String dwID,String token) {
+        this.userID=dwID;
         this.token = token;
     }
 

@@ -1,5 +1,6 @@
 import com.lmax.disruptor.*;
 import com.lmax.disruptor.dsl.Disruptor;
+import online.decentworld.rdb.mapper.WealthMapper;
 
 import java.util.concurrent.ThreadFactory;
 
@@ -8,7 +9,10 @@ import java.util.concurrent.ThreadFactory;
  */
 public class DisruptorTest {
 
+
+
     public static void main(String[] args) {
+
         final Disruptor<LongValueEvent> disruptor=new Disruptor<LongValueEvent>(new EventFactory<LongValueEvent>() {
             @Override
             public LongValueEvent newInstance() {

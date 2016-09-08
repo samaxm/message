@@ -3,9 +3,7 @@ package online.decentworld.message.core.handlers;
 import com.lmax.disruptor.EventHandler;
 import com.lmax.disruptor.WorkHandler;
 import online.decentworld.message.core.MessageReceiveEvent;
-import online.decentworld.message.security.ValidateStrategy;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import online.decentworld.message.security.validate.ValidateStrategy;
 
 
 /**
@@ -33,11 +31,4 @@ public class ValidateMessageHandler implements EventHandler<MessageReceiveEvent>
         onEvent(messageReceiveEvent);
     }
 
-    public void setValidate(ValidateStrategy validate) {
-        this.validate = validate;
-    }
-
-    public ValidateStrategy getValidate(){
-        return validate;
-    }
 }

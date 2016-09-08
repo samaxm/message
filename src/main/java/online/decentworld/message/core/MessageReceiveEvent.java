@@ -1,6 +1,7 @@
 package online.decentworld.message.core;
 
 import online.decentworld.message.Charge.ChargeResult;
+import online.decentworld.message.security.validate.ValidateInfo;
 import online.decentworld.rpc.dto.message.BaseMessage;
 
 /**
@@ -32,7 +33,10 @@ public class MessageReceiveEvent {
      * charge result if the msg need to be charged
      */
     private ChargeResult chargeResult;
-
+    /**
+     * receive data
+     */
+    private byte[] data;
 
     public BaseMessage getMsg() {
         return msg;
@@ -80,5 +84,13 @@ public class MessageReceiveEvent {
 
     public void setChargeResult(ChargeResult chargeResult) {
         this.chargeResult = chargeResult;
+    }
+
+    public byte[] getData() {
+        return data;
+    }
+
+    public void setData(byte[] data) {
+        this.data = data;
     }
 }
