@@ -2,6 +2,8 @@ package online.decentworld.message.config;
 
 import com.lmax.disruptor.RingBuffer;
 import com.lmax.disruptor.dsl.Disruptor;
+import online.decentworld.cache.config.CacheBeanConfig;
+import online.decentworld.message.Charge.*;
 import online.decentworld.message.core.handlers.*;
 import online.decentworld.message.core.MessageReceiveEvent;
 import online.decentworld.message.security.validate.DemoValidateStrategy;
@@ -32,7 +34,7 @@ import java.util.concurrent.Executors;
 		@Filter(type=FilterType.ANNOTATION,value=EnableWebMvc.class)
 })
 @EnableTransactionManagement
-@Import(DBConfig.class)
+@Import(value = {DBConfig.class,CacheBeanConfig.class})
 public class ApplicationRootConfig {
 	
 	@SuppressWarnings("unused")
@@ -49,14 +51,24 @@ public class ApplicationRootConfig {
 		return manager;
 	}
 
+	@Bean
+	public PriceCounter getPriceCounter(){
+		return new DefaultPriceCounter();
+	}
+
+	@Bean
+	public IChargeService getChargeService(){
+		return new ChargeService();
+	}
+
 	@Bean(name = "messageDisruptor")
-	public Disruptor<MessageReceiveEvent> getDisruptor(){
+	public Disruptor<MessageReceiveEvent> getDisruptor(Charger charger){
 		Executor executor= Executors.newCachedThreadPool();
 		Disruptor<MessageReceiveEvent> disruptor=new Disruptor<MessageReceiveEvent>(MessageReceiveEvent::new,1024,executor);
 		disruptor.handleEventsWith(new ValidateMessageHandler (new DemoValidateStrategy()))
 				.then(decodeHandler)
 				.then(new LogHandler())
-				.thenHandleEventsWithWorkerPool(ChargeHandler.createGroup(4))
+				.thenHandleEventsWithWorkerPool(ChargeHandler.createGroup(4,charger))
 				.thenHandleEventsWithWorkerPool(PersistenceHandler.createGroup(4))
 				.thenHandleEventsWithWorkerPool(DeliverHandler.createGroup(2))
 				.then(new CleanHandler());
@@ -79,6 +91,10 @@ public class ApplicationRootConfig {
 		return new DemoValidateStrategy();
 	}
 
+	@Bean
+	public Charger getCharger(IChargeService chargeService,PriceCounter priceCounter){
+		return  new Charger(chargeService,priceCounter);
+	}
 
 
 }

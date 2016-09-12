@@ -7,6 +7,9 @@ import org.springframework.transaction.annotation.Transactional;
  */
 public interface IChargeService {
     @Transactional
-    public ChargeResult p2pCharge(String payerID,String payeeID,int amount);
+    public P2PChargeResult p2pCharge(String payerID,String payeeID, int payerChargeAmount, int payeeChargeAmount);
 
+
+    @Transactional
+    public ChargeResult charge(String dwID,int chargeAmount);
 }

@@ -1,11 +1,7 @@
-import online.decentworld.message.Charge.ChargeResult;
+import online.decentworld.message.Charge.P2PChargeResult;
 import online.decentworld.message.Charge.IChargeService;
 import online.decentworld.message.config.ApplicationRootConfig;
-import online.decentworld.message.security.lock.ZKLock;
-import online.decentworld.message.util.LogUtil;
 import online.decentworld.rdb.config.DBConfig;
-import online.decentworld.rdb.entity.DBChargeResult;
-import online.decentworld.rdb.mapper.WealthMapper;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
@@ -30,7 +26,7 @@ public class SpringTest {
     @Test
     public void test() throws InterruptedException {
 
-        ChargeResult result=chargeService.p2pCharge("123", "456", 10);
+        P2PChargeResult result=chargeService.p2pCharge("123", "456", 10);
         System.out.println("456:"+result.getPayeeWealth()+" 123:"+result.getPayerWealth()+" code:"+result.getStatusCode());
 
     }

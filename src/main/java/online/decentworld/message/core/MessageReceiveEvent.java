@@ -1,6 +1,6 @@
 package online.decentworld.message.core;
 
-import online.decentworld.message.Charge.ChargeResult;
+import online.decentworld.message.Charge.P2PChargeResult;
 import online.decentworld.message.security.validate.ValidateInfo;
 import online.decentworld.rpc.dto.message.BaseMessage;
 
@@ -32,7 +32,7 @@ public class MessageReceiveEvent {
     /**
      * charge result if the msg need to be charged
      */
-    private ChargeResult chargeResult;
+    private P2PChargeResult chargeResult;
     /**
      * receive data
      */
@@ -78,11 +78,11 @@ public class MessageReceiveEvent {
         this.userID = userID;
     }
 
-    public ChargeResult getChargeResult() {
+    public P2PChargeResult getChargeResult() {
         return chargeResult;
     }
 
-    public void setChargeResult(ChargeResult chargeResult) {
+    public void setChargeResult(P2PChargeResult chargeResult) {
         this.chargeResult = chargeResult;
     }
 

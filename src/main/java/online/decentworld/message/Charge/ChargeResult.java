@@ -3,9 +3,13 @@ package online.decentworld.message.Charge;
 import online.decentworld.message.common.ChargeResultCode;
 
 /**
- * Created by Sammax on 2016/9/7.
+ * Created by Sammax on 2016/9/9.
  */
 public class ChargeResult {
+    private ChargeResultCode statusCode;
+    private int newWealth;
+    private ConsumType type;
+
     public ChargeResultCode getStatusCode() {
         return statusCode;
     }
@@ -14,24 +18,19 @@ public class ChargeResult {
         this.statusCode = statusCode;
     }
 
-    private ChargeResultCode statusCode;
-    private int payerWealth;
-    private int payeeWealth;
-
-
-    public int getPayerWealth() {
-        return payerWealth;
+    public int getNewWealth() {
+        return newWealth;
     }
 
-    public void setPayerWealth(int payerWealth) {
-        this.payerWealth = payerWealth;
+    public void setNewWealth(int newWealth) {
+        this.newWealth = newWealth;
     }
 
-    public int getPayeeWealth() {
-        return payeeWealth;
+    public ConsumType getType() {
+        return type;
     }
 
-    public void setPayeeWealth(int payeeWealth) {
-        this.payeeWealth = payeeWealth;
+    public void setType(ConsumType type) {
+        this.type = type;
     }
 }

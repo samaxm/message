@@ -3,7 +3,6 @@ package online.decentworld.message.core.handlers;
 import com.lmax.disruptor.EventHandler;
 import com.lmax.disruptor.WorkHandler;
 import online.decentworld.message.core.MessageReceiveEvent;
-import online.decentworld.message.security.validate.HttpSimpleValidateInfo;
 import online.decentworld.rpc.codc.Codec;
 import org.springframework.stereotype.Component;
 
@@ -27,7 +26,9 @@ public class DecodeHandler implements EventHandler<MessageReceiveEvent>,WorkHand
 
     @Override
     public void onEvent(MessageReceiveEvent messageReceiveEvent) throws Exception {
-        messageReceiveEvent.setMsg(codec.decode(messageReceiveEvent.getData()));
-        messageReceiveEvent.setData(null);
+        if(messageReceiveEvent.getStatus().isValidate()) {
+            messageReceiveEvent.setMsg(codec.decode(messageReceiveEvent.getData()));
+            messageReceiveEvent.setData(null);
+        }
     }
 }

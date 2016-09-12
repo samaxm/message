@@ -281,6 +281,12 @@
             <artifactId>rpc</artifactId>
             <version>0.0.1</version>
         </dependency>
+        <dependency>
+            <groupId>online.decentworld</groupId>
+            <artifactId>cache</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+
 
         <dependency>
             <groupId>com.lmax</groupId>

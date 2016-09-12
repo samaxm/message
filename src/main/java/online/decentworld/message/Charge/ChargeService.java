@@ -21,32 +21,68 @@ public class ChargeService implements IChargeService {
 
 
     @Override
-    public ChargeResult p2pCharge(String payerID, String payeeID, int amount) {
+    public P2PChargeResult p2pCharge(String payerID, String payeeID, int payerChargeAmount, int payeeChargeAmount) {
         DBChargeResult payerResult=null;
         DBChargeResult payeeResult = null;
-        try{
-            ZKLock.getWealthLock(payerID);
-            payerResult =wealthMapper.charge(payerID, -Math.abs(amount));
-        }catch (Exception ex){
-            logger.warn("",ex);
-            throw ex;
-        }finally {
-            ZKLock.unlockForExclusive(payerID);
+        P2PChargeResult result =new P2PChargeResult();
+        if(payerChargeAmount!=0) {
+            try {
+                ZKLock.getWealthLock(payerID);
+                payerResult = wealthMapper.charge(payerID, payerChargeAmount);
+                result.setPayerWealth(payerResult.getNewWealth());
+            } catch (Exception ex) {
+                result.setStatusCode(ChargeResultCode.FAIL);
+                logger.warn("", ex);
+                return  result;
+            } finally {
+                ZKLock.unlockForExclusive(payerID);
+            }
+        }else{
+            //flag -1 means no change
+            result.setPayerWealth(-1);
         }
-
-        try{
-            ZKLock.getWealthLock(payeeID);
-            payeeResult= wealthMapper.charge(payeeID,Math.abs(amount));
-        }catch (Exception ex){
-            logger.warn("",ex);
-            //TODO:payback
-        }finally {
-            ZKLock.unlockForExclusive(payerID);
+        if(payeeChargeAmount!=0) {
+            try {
+                ZKLock.getWealthLock(payeeID);
+                payeeResult = wealthMapper.charge(payeeID, payeeChargeAmount);
+                result.setPayeeWealth(payeeResult.getNewWealth());
+            } catch (Exception ex) {
+                result.setStatusCode(ChargeResultCode.FAIL);
+                logger.warn("", ex);
+                //TODO:payback
+                return  result;
+            } finally {
+                ZKLock.unlockForExclusive(payerID);
+            }
+        }else {
+            //flag -1 means no change
+            result.setPayeeWealth(-1);
         }
-        ChargeResult result =new ChargeResult();
         result.setStatusCode(ChargeResultCode.SUCCESS);
-        result.setPayeeWealth(payeeResult.getNewWealth());
-        result.setPayerWealth(payerResult.getNewWealth());
+        return result;
+    }
+
+    @Override
+    public ChargeResult charge(String dwID, int chargeAmount) {
+        DBChargeResult dbResult = null;
+        ChargeResult result =new ChargeResult();
+        if(chargeAmount!=0) {
+            try {
+                ZKLock.getWealthLock(dwID);
+                dbResult = wealthMapper.charge(dwID, chargeAmount);
+                result.setNewWealth(dbResult.getNewWealth());
+            } catch (Exception ex) {
+                result.setStatusCode(ChargeResultCode.FAIL);
+                logger.warn("", ex);
+                return  result;
+            } finally {
+                ZKLock.unlockForExclusive(dwID);
+            }
+        }else{
+            //flag -1 means no change
+            result.setNewWealth(-1);
+        }
+        result.setStatusCode(ChargeResultCode.SUCCESS);
         return result;
     }
 
