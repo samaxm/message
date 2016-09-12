@@ -4,10 +4,9 @@ import com.lmax.disruptor.RingBuffer;
 import com.lmax.disruptor.dsl.Disruptor;
 import online.decentworld.cache.config.CacheBeanConfig;
 import online.decentworld.message.Charge.*;
-import online.decentworld.message.core.handlers.*;
 import online.decentworld.message.core.MessageReceiveEvent;
-import online.decentworld.message.security.validate.DemoValidateStrategy;
-import online.decentworld.message.security.validate.ValidateStrategy;
+import online.decentworld.message.core.handlers.*;
+import online.decentworld.message.security.validate.SimpleTokenValidate;
 import online.decentworld.rdb.config.DBConfig;
 import online.decentworld.rpc.codc.Codec;
 import online.decentworld.rpc.codc.protos.SimpleProtosCodec;
@@ -65,7 +64,7 @@ public class ApplicationRootConfig {
 	public Disruptor<MessageReceiveEvent> getDisruptor(Charger charger){
 		Executor executor= Executors.newCachedThreadPool();
 		Disruptor<MessageReceiveEvent> disruptor=new Disruptor<MessageReceiveEvent>(MessageReceiveEvent::new,1024,executor);
-		disruptor.handleEventsWith(new ValidateMessageHandler (new DemoValidateStrategy()))
+		disruptor.handleEventsWith(new ValidateMessageHandler (new SimpleTokenValidate()))
 				.then(decodeHandler)
 				.then(new LogHandler())
 				.thenHandleEventsWithWorkerPool(ChargeHandler.createGroup(4,charger))
@@ -86,10 +85,6 @@ public class ApplicationRootConfig {
 		return new SimpleProtosCodec();
 	}
 
-	@Bean
-	public ValidateStrategy getValidateStrategy(){
-		return new DemoValidateStrategy();
-	}
 
 	@Bean
 	public Charger getCharger(IChargeService chargeService,PriceCounter priceCounter){

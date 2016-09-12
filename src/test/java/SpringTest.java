@@ -1,4 +1,3 @@
-import online.decentworld.message.Charge.P2PChargeResult;
 import online.decentworld.message.Charge.IChargeService;
 import online.decentworld.message.config.ApplicationRootConfig;
 import online.decentworld.rdb.config.DBConfig;
@@ -26,8 +25,7 @@ public class SpringTest {
     @Test
     public void test() throws InterruptedException {
 
-        P2PChargeResult result=chargeService.p2pCharge("123", "456", 10);
-        System.out.println("456:"+result.getPayeeWealth()+" 123:"+result.getPayerWealth()+" code:"+result.getStatusCode());
+
 
     }
 }
