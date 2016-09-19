@@ -1,4 +1,4 @@
-package online.decentworld.message.Charge;
+package online.decentworld.message.charge;
 
 import online.decentworld.message.common.ChargeResultCode;
 import online.decentworld.message.security.lock.ZKLock;
@@ -85,6 +85,7 @@ public class ChargeService implements IChargeService {
         result.setStatusCode(ChargeResultCode.SUCCESS);
         return result;
     }
+
 
 
 }

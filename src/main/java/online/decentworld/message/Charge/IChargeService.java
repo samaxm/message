@@ -1,4 +1,4 @@
-package online.decentworld.message.Charge;
+package online.decentworld.message.charge;
 
 import org.springframework.transaction.annotation.Transactional;
 
@@ -12,4 +12,6 @@ public interface IChargeService {
 
     @Transactional
     public ChargeResult charge(String dwID,int chargeAmount);
+
+
 }

@@ -1,4 +1,4 @@
-package online.decentworld.message.Charge;
+package online.decentworld.message.charge;
 
 import online.decentworld.message.common.ChargeResultCode;
 
