@@ -1,0 +1,37 @@
+<c3p0-config>
+  <!-- 本地测试数据库-->
+  <named-config name="local_develop"> 
+    <property name="acquireIncrement">10</property>
+    <property name="initialPoolSize">5</property>
+    <property name="minPoolSize">5</property>
+    <property name="maxPoolSize">50</property>
+    <property name="maxStatementsPerConnection">50</property>
+    <property name="driverClass">com.mysql.jdbc.Driver</property>
+    <property name="jdbcUrl">jdbc:mysql://localhost:3306/world?autoReconnect=true</property>
+    <property name="user">root</property>
+    <property name="password">123456</property>
+    <property name="maxIdleTime">1800</property>
+    <property name="idleConnectionTestPeriod">60</property>
+    <property name="unreturnedConnectionTimeout">60</property>
+    <property name="debugUnreturnedConnectionStackTraces">true</property>
+  </named-config>
+  
+  
+   <!-- 云端测试数据库 -->
+  <named-config name="server_develop"> 
+    <property name="acquireIncrement">10</property>
+    <property name="initialPoolSize">5</property>
+    <property name="minPoolSize">5</property>
+    <property name="maxPoolSize">50</property>
+    <property name="maxStatementsPerConnection">50</property>
+    <property name="driverClass">com.mysql.jdbc.Driver</property>
+    <property name="jdbcUrl">jdbc:mysql://rdszga1107w2b74eld80public.mysql.rds.aliyuncs.com:3306/face2face?autoReconnect=true</property>
+    <property name="user">sammax</property>
+    <property name="password">Samlong2016</property>
+    <property name="maxIdleTime">1800</property>
+    <property name="idleConnectionTestPeriod">60</property>
+    <property name="unreturnedConnectionTimeout">60</property>
+    <property name="debugUnreturnedConnectionStackTraces">true</property>
+  </named-config>
+ 
+</c3p0-config>

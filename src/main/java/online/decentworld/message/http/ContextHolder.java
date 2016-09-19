@@ -21,7 +21,7 @@ public class ContextHolder {
     /**
      * sync response context holder
      */
-    private static ConcurrentHashMap<String,AsyncContext> rsync_ctx=new ConcurrentHashMap<>(5000);
+    private static ConcurrentHashMap<String,SynchronizeRequest> rsync_ctx=new ConcurrentHashMap<>(5000);
 
 
     public  static void storeSendResponseCTX(String key,AsyncContext ctx){
@@ -29,10 +29,15 @@ public class ContextHolder {
         res_ctx.put(key,ctx);
     }
 
+    public static void storeSynchronizeRequest(String dwID,SynchronizeRequest request){
+        logger.debug("[STORE_SYNCHRONIZE_REQUEST] dwID#"+dwID);
+        rsync_ctx.put(dwID,request);
+    }
+
     public  static AsyncContext getSendResponseCTX(String key){
         return res_ctx.remove(key);
     }
-    public  static AsyncContext getSynchronizedCTX(String key){
+    public  static SynchronizeRequest getSynchronizedCTX(String key){
         return rsync_ctx.remove(key);
     }
     public static String getResponseKey(String dwID,String tempID){

@@ -18,6 +18,7 @@ public class ValidateMessageHandler implements EventHandler<MessageReceiveEvent>
     @Resource(name="simpleTokenValidate")
     private ValidateStrategy validate;
 
+    public ValidateMessageHandler(){}
     public ValidateMessageHandler(ValidateStrategy validate){
         super();
         this.validate=validate;

@@ -5,7 +5,7 @@ import online.decentworld.cache.redis.RedisIDUtil;
 import online.decentworld.cache.redis.RedisTemplate;
 import online.decentworld.cache.redis.ReturnResult;
 import online.decentworld.message.common.MessageCacheConfig;
-import online.decentworld.message.common.MessageStatus;
+import online.decentworld.message.common.MessageProcessStatus;
 import online.decentworld.message.exception.PersistMessageFailException;
 import online.decentworld.rpc.codc.Codec;
 import online.decentworld.rpc.dto.message.ChatMessage;
@@ -19,6 +19,8 @@ import org.springframework.stereotype.Component;
 import redis.clients.jedis.Jedis;
 
 import javax.annotation.Resource;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Created by Sammax on 2016/9/12.
@@ -39,11 +41,11 @@ public class MessageCache extends RedisTemplate {
             long id=idUtil.getID(jedis);
             String senderID=msg.getSender();
             String receiverID=msg.getReceiver();
-            jedis.zadd(MessageCacheKey.getUserMessageCacheKey(senderID), id, MessageStatus.SENDED.name());
+            jedis.zadd(MessageCacheKey.getUserMessageCacheKey(senderID), id, MessageProcessStatus.SENDED.name());
             //cache temp wealth ack for recheck
             byte[] wealth_ack=codec.encode(new MessageWrapper("SYSTEM_MESSAGE_SENDER", msg.getReceiver(), MessageType.WEALTH_ACK, ack));
             jedis.setex(((ChatMessage) msg.getBody()).getTempID().getBytes(), MessageCacheConfig.WEALTH_ACK_SECONDS,wealth_ack);
-            jedis.zadd(MessageCacheKey.getUserMessageCacheKey(receiverID), id,MessageStatus.RECEIVED.name());
+            jedis.zadd(MessageCacheKey.getUserMessageCacheKey(receiverID), id, MessageProcessStatus.RECEIVED.name());
             jedis.hset(CacheKey.CHAT.getBytes(),String.valueOf(id).getBytes(),codec.encode(msg));
             return ReturnResult.SUCCESS;
         });
@@ -51,5 +53,30 @@ public class MessageCache extends RedisTemplate {
             logger.warn("[ID_CACHE_FAILED] sender#"+msg.getSender()+" recevier#"+msg.getReceiver()+" data#");
             throw new PersistMessageFailException();
         }
+    }
+
+    public MessageSynchronizeResult synchronizeMessage(String dwID,long synchronizeNum){
+        ReturnResult result=cache((Jedis jedis) -> {
+            Set<String> newMessageIDs = jedis.zrangeByScore(MessageCacheKey.getUserMessageCacheKey(dwID), synchronizeNum, Integer.MAX_VALUE);
+            List<byte[]> msgs = jedis.hmget(MessageCacheKey.CHAT.getBytes(), format(newMessageIDs));
+
+            List<byte[]> notices = jedis.lrange(MessageCacheKey.getUserConsumableCacheKey(dwID).getBytes(), 0, -1);
+
+            MessageSynchronizeResult newMessages = new MessageSynchronizeResult(msgs, notices);
+            return ReturnResult.result(newMessages);
+        });
+        if(result.isSuccess()){
+            return (MessageSynchronizeResult) result.getResult();
+        }
+        return null;
+    }
+
+    private byte[][] format(Set<String> ids){
+        String[] idArr=ids.toArray(new String[ids.size()]);
+        byte[][] bytes=new byte[idArr.length][];
+        for(int i=0;i<idArr.length;i++){
+            bytes[i]=idArr[i].getBytes();
+        }
+        return bytes;
     }
 }

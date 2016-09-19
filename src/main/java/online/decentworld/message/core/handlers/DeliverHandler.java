@@ -3,12 +3,8 @@ package online.decentworld.message.core.handlers;
 import com.lmax.disruptor.EventHandler;
 import com.lmax.disruptor.WorkHandler;
 import online.decentworld.message.core.MessageSendEvent;
-import online.decentworld.message.http.ContextHolder;
-import online.decentworld.rpc.dto.message.types.MessageType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.servlet.AsyncContext;
 
 /**
  * Created by Sammax on 2016/9/19.
@@ -25,12 +21,12 @@ public class DeliverHandler implements EventHandler<MessageSendEvent>,WorkHandle
     @Override
     public void onEvent(MessageSendEvent messageSendEvent) throws Exception {
         logger.debug("[DELIVER_MESSAGE]");
-        AsyncContext ctx=null;
-        if(messageSendEvent.getType()== MessageType.WEALTH_ACK){
-            ctx=ContextHolder.getSendResponseCTX(messageSendEvent.getReceiverID());
-        }else{
-            ctx=ContextHolder.getSynchronizedCTX(messageSendEvent.getReceiverID());
-        }
+//        AsyncContext ctx=null;
+//        if(messageSendEvent.getType()== MessageType.WEALTH_ACK){
+//            ctx=ContextHolder.getSendResponseCTX(messageSendEvent.getReceiverID());
+//        }else{
+//            ctx=ContextHolder.getSynchronizedCTX(messageSendEvent.getReceiverID());
+//        }
 //        if(ctx!=null){
 //            if(messageReceiveEvent.getStatus().isValidate()&&messageReceiveEvent.getStatus().isCanDeliver()){
 //                logger.debug("[DELIVERING_MSG_ONLINE]");

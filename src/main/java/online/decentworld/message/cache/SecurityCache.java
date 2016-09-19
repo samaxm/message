@@ -4,11 +4,13 @@ import online.decentworld.cache.redis.CacheKey;
 import online.decentworld.cache.redis.RedisClient;
 import online.decentworld.cache.redis.RedisTemplate;
 import online.decentworld.cache.redis.ReturnResult;
+import org.springframework.stereotype.Component;
 import redis.clients.jedis.Jedis;
 
 /**
  * Created by Sammax on 2016/9/12.
  */
+@Component
 public class SecurityCache extends RedisTemplate {
 
     public void cacheAES(String dwID,String aes) throws Exception {

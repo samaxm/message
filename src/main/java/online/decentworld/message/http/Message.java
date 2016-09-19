@@ -2,6 +2,8 @@ package online.decentworld.message.http;
 
 import com.lmax.disruptor.EventTranslatorOneArg;
 import com.lmax.disruptor.dsl.Disruptor;
+import online.decentworld.message.cache.MessageCache;
+import online.decentworld.message.cache.MessageSynchronizeResult;
 import online.decentworld.message.config.Common;
 import online.decentworld.message.core.MessageReceiveEvent;
 import online.decentworld.message.core.TranslateInfo;
@@ -9,6 +11,7 @@ import online.decentworld.rpc.dto.api.StatusCode;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
@@ -33,6 +36,8 @@ public class Message {
     private Disruptor<MessageReceiveEvent> disruptor;
     @Resource(name="messageEventTranslator")
     private EventTranslatorOneArg translator;
+    @Autowired
+    private MessageCache messageCache;
 
 
     @RequestMapping(value = "send")
@@ -83,7 +88,15 @@ public class Message {
                 }
             }
         }
+    }
 
+
+
+    @RequestMapping(value="sync")
+    public void synchronizeMessage(long syncNum,String dwID,HttpServletRequest request,HttpServletResponse response){
+        SynchronizeRequest sr=new SynchronizeRequest();
+        MessageSynchronizeResult result=messageCache.synchronizeMessage(dwID, syncNum);
+//        result.get
     }
 
 }

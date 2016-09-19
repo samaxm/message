@@ -1,6 +1,5 @@
 package online.decentworld.message.config;
 
-import com.lmax.disruptor.RingBuffer;
 import com.lmax.disruptor.dsl.Disruptor;
 import online.decentworld.cache.config.CacheBeanConfig;
 import online.decentworld.message.charge.*;
@@ -22,7 +21,6 @@ import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
-import javax.annotation.Resource;
 import javax.sql.DataSource;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -41,12 +39,9 @@ public class ApplicationRootConfig {
 	
 	@SuppressWarnings("unused")
 	private static Logger logger=LoggerFactory.getLogger(ApplicationRootConfig.class);
-	@Resource(name = "messageDisruptor")
-	private Disruptor<MessageReceiveEvent> disruptor;
-	@Autowired
-	private DecodeHandler decodeHandler;
-	@Autowired
-	private ValidateMessageHandler validateMessageHandler;
+
+
+
 	@Autowired
 	private PersistStrategy persistStrategy;
 
@@ -68,7 +63,9 @@ public class ApplicationRootConfig {
 	}
 
 	@Bean(name = "messageDisruptor")
-	public Disruptor<MessageReceiveEvent> getDisruptor(Charger charger,Disruptor<MessageSendEvent> sendEventDisruptor){
+	public Disruptor<MessageReceiveEvent> getDisruptor(Charger charger,Disruptor<MessageSendEvent> sendEventDisruptor,ValidateMessageHandler validateMessageHandler
+	, DecodeHandler decodeHandler,PersistStrategy persistStrategy
+	){
 		Executor executor= Executors.newCachedThreadPool();
 		Disruptor<MessageReceiveEvent> disruptor=new Disruptor<MessageReceiveEvent>(MessageReceiveEvent::new,1024,executor);
 		disruptor.handleEventsWith(validateMessageHandler)
@@ -78,6 +75,7 @@ public class ApplicationRootConfig {
 				.thenHandleEventsWithWorkerPool(PersistenceHandler.createGroup(4,persistStrategy))
 				.thenHandleEventsWithWorkerPool(DispatcherHandler.createGroup(2, sendEventDisruptor))
 				.then(new CleanHandler());
+		disruptor.setDefaultExceptionHandler(new DefaultExceptionHandler());
 		disruptor.start();
 		return disruptor;
 	}
@@ -91,10 +89,7 @@ public class ApplicationRootConfig {
 		return disruptor;
 	}
 
-	@Bean(name = "messageRingBuffer")
-	public RingBuffer<MessageReceiveEvent> messageEventRingBuffer(){
-		return disruptor.getRingBuffer();
-	}
+
 
 	@Bean(name = "protosCodec")
 	public Codec getCodec(ProtosBodyCodecFactory codecFactory){

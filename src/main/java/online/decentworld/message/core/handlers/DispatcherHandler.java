@@ -40,21 +40,22 @@ public class DispatcherHandler implements EventHandler<MessageReceiveEvent>,Work
     public void onEvent(MessageReceiveEvent messageReceiveEvent) throws Exception {
         logger.debug("[DELIVERING_MSG]");
         MessageStatus status=messageReceiveEvent.getStatus();
-        if(messageReceiveEvent.getMsg().getType()== MessageType.CHAT){
-            ChatMessage cm=(ChatMessage)messageReceiveEvent.getMsg().getBody();
-            if(status.isValidate()&&status.isCanDeliver()&&status.isPersistSuccessful()){
-                MessageSendEventTranslateInfo info=new MessageSendEventTranslateInfo(codec.encode(messageReceiveEvent.getMsg()),messageReceiveEvent.getMsg().getReceiver(),messageReceiveEvent.getMsg().getType());
-                disruptor.publishEvent(translator,info);
-                MessageSendEventTranslateInfo ack=new MessageSendEventTranslateInfo(codec.encode(new MessageWrapper(MessageConfig.SYSTEM_MESSAGE_SENDER,messageReceiveEvent.getMsg().getSender(),MessageType.WEALTH_ACK,messageReceiveEvent.getWealthAckMessage())),
-                        ContextHolder.getResponseKey(cm.getFromID(),cm.getTempID()),MessageType.WEALTH_ACK);
-                disruptor.publishEvent(translator,ack);
-            }
-        }else{
-            if(status.isValidate()&&status.isCanDeliver()){
+        if(status.isValidate()&&status.isCanDeliver()){
+            if(messageReceiveEvent.getMsg().getType()== MessageType.CHAT){
+                ChatMessage cm=(ChatMessage)messageReceiveEvent.getMsg().getBody();
+                if(status.isPersistSuccessful()){
+                    MessageSendEventTranslateInfo info=new MessageSendEventTranslateInfo(codec.encode(messageReceiveEvent.getMsg()),messageReceiveEvent.getMsg().getReceiver(),messageReceiveEvent.getMsg().getType());
+                    disruptor.publishEvent(translator,info);
+                    MessageSendEventTranslateInfo ack=new MessageSendEventTranslateInfo(codec.encode(new MessageWrapper(MessageConfig.SYSTEM_MESSAGE_SENDER,messageReceiveEvent.getMsg().getSender(),MessageType.WEALTH_ACK,messageReceiveEvent.getWealthAckMessage())),
+                            ContextHolder.getResponseKey(cm.getFromID(),cm.getTempID()),MessageType.WEALTH_ACK);
+                    disruptor.publishEvent(translator,ack);
+                }
+            }else{
                 MessageSendEventTranslateInfo info=new MessageSendEventTranslateInfo(codec.encode(messageReceiveEvent.getMsg()),messageReceiveEvent.getMsg().getReceiver(),messageReceiveEvent.getMsg().getType());
                 disruptor.publishEvent(translator,info);
             }
         }
+
     }
 
     public static DispatcherHandler[] createGroup(int size,Disruptor<MessageSendEvent> disruptor){
