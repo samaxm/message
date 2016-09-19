@@ -32,7 +32,9 @@ public class ContextHolder {
     public  static AsyncContext getSendResponseCTX(String key){
         return res_ctx.remove(key);
     }
-
+    public  static AsyncContext getSynchronizedCTX(String key){
+        return rsync_ctx.remove(key);
+    }
     public static String getResponseKey(String dwID,String tempID){
         return dwID+tempID;
     }

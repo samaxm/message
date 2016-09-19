@@ -6,13 +6,15 @@ import online.decentworld.message.core.MessageReceiveEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.lang.reflect.Field;
+
 /**
  * Created by Sammax on 2016/9/7.
  */
 public class CleanHandler implements EventHandler<MessageReceiveEvent>,WorkHandler<MessageReceiveEvent> {
 
     private static Logger logger= LoggerFactory.getLogger(CleanHandler.class);
-
+    private static Field[] fields=MessageReceiveEvent.class.getDeclaredFields();
     @Override
     public void onEvent(MessageReceiveEvent messageReceiveEvent, long l, boolean b) throws Exception {
         onEvent(messageReceiveEvent);
@@ -21,5 +23,16 @@ public class CleanHandler implements EventHandler<MessageReceiveEvent>,WorkHandl
     @Override
     public void onEvent(MessageReceiveEvent messageReceiveEvent) throws Exception {
         logger.debug("[RESET_EVENT_FIELD]");
+        resetFields(messageReceiveEvent);
+    }
+
+    private void resetFields(MessageReceiveEvent messageReceiveEvent){
+        for(Field f:fields){
+            try{
+                f.set(messageReceiveEvent,null);
+            }catch (Exception e){
+                logger.warn("",e);
+            }
+        }
     }
 }

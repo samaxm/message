@@ -286,7 +286,11 @@
             <artifactId>cache</artifactId>
             <version>1.0.0</version>
         </dependency>
-
+        <dependency>
+            <groupId>online.decentworld</groupId>
+            <artifactId>tools</artifactId>
+            <version>1.0</version>
+        </dependency>
 
         <dependency>
             <groupId>com.lmax</groupId>

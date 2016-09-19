@@ -6,7 +6,7 @@ package online.decentworld.message.core;
 public class MessageStatus {
 
     private boolean isValidate;
-
+    private boolean isPersistSuccessful;
     private boolean canDeliver;
 
     public static MessageStatus INITSTATUS(){
@@ -35,5 +35,13 @@ public class MessageStatus {
 
     public void setCanDeliver(boolean canDeliver) {
         this.canDeliver = canDeliver;
+    }
+
+    public boolean isPersistSuccessful() {
+        return isPersistSuccessful;
+    }
+
+    public void setPersistSuccessful(boolean isPersistSuccessful) {
+        this.isPersistSuccessful = isPersistSuccessful;
     }
 }

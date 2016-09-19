@@ -3,12 +3,15 @@ package online.decentworld.message.config;
 import com.lmax.disruptor.RingBuffer;
 import com.lmax.disruptor.dsl.Disruptor;
 import online.decentworld.cache.config.CacheBeanConfig;
-import online.decentworld.message.Charge.*;
+import online.decentworld.message.charge.*;
 import online.decentworld.message.core.MessageReceiveEvent;
+import online.decentworld.message.core.MessageSendEvent;
 import online.decentworld.message.core.handlers.*;
-import online.decentworld.message.security.validate.SimpleTokenValidate;
+import online.decentworld.message.persist.PersistStrategy;
 import online.decentworld.rdb.config.DBConfig;
 import online.decentworld.rpc.codc.Codec;
+import online.decentworld.rpc.codc.protos.ProtosBodyCodecFactory;
+import online.decentworld.rpc.codc.protos.ReflectBodyCodecFactory;
 import online.decentworld.rpc.codc.protos.SimpleProtosCodec;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,6 +45,10 @@ public class ApplicationRootConfig {
 	private Disruptor<MessageReceiveEvent> disruptor;
 	@Autowired
 	private DecodeHandler decodeHandler;
+	@Autowired
+	private ValidateMessageHandler validateMessageHandler;
+	@Autowired
+	private PersistStrategy persistStrategy;
 
 	@Bean
 	public DataSourceTransactionManager getTXManager(DataSource ds){
@@ -61,16 +68,25 @@ public class ApplicationRootConfig {
 	}
 
 	@Bean(name = "messageDisruptor")
-	public Disruptor<MessageReceiveEvent> getDisruptor(Charger charger){
+	public Disruptor<MessageReceiveEvent> getDisruptor(Charger charger,Disruptor<MessageSendEvent> sendEventDisruptor){
 		Executor executor= Executors.newCachedThreadPool();
 		Disruptor<MessageReceiveEvent> disruptor=new Disruptor<MessageReceiveEvent>(MessageReceiveEvent::new,1024,executor);
-		disruptor.handleEventsWith(new ValidateMessageHandler (new SimpleTokenValidate()))
+		disruptor.handleEventsWith(validateMessageHandler)
 				.then(decodeHandler)
 				.then(new LogHandler())
 				.thenHandleEventsWithWorkerPool(ChargeHandler.createGroup(4,charger))
-				.thenHandleEventsWithWorkerPool(PersistenceHandler.createGroup(4))
-				.thenHandleEventsWithWorkerPool(DeliverHandler.createGroup(2))
+				.thenHandleEventsWithWorkerPool(PersistenceHandler.createGroup(4,persistStrategy))
+				.thenHandleEventsWithWorkerPool(DispatcherHandler.createGroup(2, sendEventDisruptor))
 				.then(new CleanHandler());
+		disruptor.start();
+		return disruptor;
+	}
+
+	@Bean(name = "messageSenderDisruptor")
+	public Disruptor<MessageSendEvent> getSenderDisruptor(){
+		Executor executor= Executors.newCachedThreadPool();
+		Disruptor<MessageSendEvent> disruptor=new Disruptor<MessageSendEvent>(MessageSendEvent::new,1024,executor);
+
 		disruptor.start();
 		return disruptor;
 	}
@@ -81,8 +97,16 @@ public class ApplicationRootConfig {
 	}
 
 	@Bean(name = "protosCodec")
-	public Codec getCodec(){
-		return new SimpleProtosCodec();
+	public Codec getCodec(ProtosBodyCodecFactory codecFactory){
+		SimpleProtosCodec codec= new SimpleProtosCodec();
+		codec.setCodecFactory(codecFactory);
+		return codec;
+	}
+
+
+	@Bean
+	public ProtosBodyCodecFactory codecFactory(){
+		return new ReflectBodyCodecFactory();
 	}
 
 

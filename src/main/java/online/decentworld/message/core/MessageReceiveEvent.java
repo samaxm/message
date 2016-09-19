@@ -1,11 +1,12 @@
 package online.decentworld.message.core;
 
-import online.decentworld.message.Charge.P2PChargeResult;
+import online.decentworld.message.charge.MessageChargeResult;
 import online.decentworld.message.security.validate.ValidateInfo;
-import online.decentworld.rpc.dto.message.BaseMessage;
+import online.decentworld.rpc.dto.message.MessageWrapper;
+import online.decentworld.rpc.dto.message.WealthAckMessage;
 
 /**
- * field can never be write by multi consumer concurrently!
+ * same field can never be write by multi consumer concurrently!
  */
 public class MessageReceiveEvent {
 
@@ -16,7 +17,7 @@ public class MessageReceiveEvent {
     /**
      * message
      */
-    private BaseMessage msg;
+    private MessageWrapper msg;
     /**
      * validate info
      */
@@ -32,17 +33,31 @@ public class MessageReceiveEvent {
     /**
      * charge result if the msg need to be charged
      */
-    private P2PChargeResult chargeResult;
+    private MessageChargeResult chargeResult;
     /**
      * receive data
      */
     private byte[] data;
+    /**
+     * wealth ack message
+     */
+    private WealthAckMessage wealthAckMessage;
 
-    public BaseMessage getMsg() {
+
+
+    public WealthAckMessage getWealthAckMessage() {
+        return wealthAckMessage;
+    }
+
+    public void setWealthAckMessage(WealthAckMessage wealthAckMessage) {
+        this.wealthAckMessage = wealthAckMessage;
+    }
+
+    public MessageWrapper getMsg() {
         return msg;
     }
 
-    public void setMsg(BaseMessage msg) {
+    public void setMsg(MessageWrapper msg) {
         this.msg = msg;
     }
 
@@ -78,11 +93,11 @@ public class MessageReceiveEvent {
         this.userID = userID;
     }
 
-    public P2PChargeResult getChargeResult() {
+    public MessageChargeResult getChargeResult() {
         return chargeResult;
     }
 
-    public void setChargeResult(P2PChargeResult chargeResult) {
+    public void setChargeResult(MessageChargeResult chargeResult) {
         this.chargeResult = chargeResult;
     }
 

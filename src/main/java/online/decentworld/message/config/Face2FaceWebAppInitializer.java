@@ -1,6 +1,5 @@
 package online.decentworld.message.config;
 
-import online.decentworld.message.config.ServletConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.filter.CharacterEncodingFilter;
@@ -10,8 +9,7 @@ import javax.servlet.Filter;
 import javax.servlet.MultipartConfigElement;
 import javax.servlet.ServletRegistration.Dynamic;
 
-import static online.decentworld.message.util.LogUtil.toLogString;
-
+import static online.decentworld.message.util.WebLogUtil.toLogString;
 /**
  * servlet config 
  * 

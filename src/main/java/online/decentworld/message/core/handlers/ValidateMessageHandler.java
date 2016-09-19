@@ -4,14 +4,18 @@ import com.lmax.disruptor.EventHandler;
 import com.lmax.disruptor.WorkHandler;
 import online.decentworld.message.core.MessageReceiveEvent;
 import online.decentworld.message.security.validate.ValidateStrategy;
+import org.springframework.stereotype.Component;
+
+import javax.annotation.Resource;
 
 
 /**
  * Created by Sammax on 2016/9/7.
  */
-
+@Component
 public class ValidateMessageHandler implements EventHandler<MessageReceiveEvent>,WorkHandler<MessageReceiveEvent>{
 
+    @Resource(name="simpleTokenValidate")
     private ValidateStrategy validate;
 
     public ValidateMessageHandler(ValidateStrategy validate){

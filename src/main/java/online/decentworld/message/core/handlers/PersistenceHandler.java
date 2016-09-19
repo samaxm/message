@@ -2,7 +2,14 @@ package online.decentworld.message.core.handlers;
 
 import com.lmax.disruptor.EventHandler;
 import com.lmax.disruptor.WorkHandler;
+import online.decentworld.message.charge.MessageChargeResult;
+import online.decentworld.message.common.ChargeResultCode;
 import online.decentworld.message.core.MessageReceiveEvent;
+import online.decentworld.message.core.MessageStatus;
+import online.decentworld.message.persist.PersistStrategy;
+import online.decentworld.rpc.dto.message.ChatMessage;
+import online.decentworld.rpc.dto.message.WealthAckMessage;
+import online.decentworld.rpc.dto.message.types.MessageType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,6 +20,15 @@ public class PersistenceHandler implements EventHandler<MessageReceiveEvent>,Wor
 
     private static Logger logger= LoggerFactory.getLogger(PersistenceHandler.class);
 
+    private PersistStrategy persistStrategy;
+
+    public PersistenceHandler(PersistStrategy persistStrategy) {
+        this.persistStrategy = persistStrategy;
+    }
+
+    public PersistenceHandler() {
+    }
+
     @Override
     public void onEvent(MessageReceiveEvent messageReceiveEvent, long l, boolean b) throws Exception {
         onEvent(messageReceiveEvent);
@@ -21,12 +37,28 @@ public class PersistenceHandler implements EventHandler<MessageReceiveEvent>,Wor
     @Override
     public void onEvent(MessageReceiveEvent messageReceiveEvent) throws Exception {
         logger.debug("[SAVING TO DB---->]");
+        MessageStatus status=messageReceiveEvent.getStatus();
+        //only persist validate chat msg
+        if(status.isValidate()&&messageReceiveEvent.getMsg().getType()== MessageType.CHAT){
+            try{
+                ChatMessage msg=(ChatMessage)messageReceiveEvent.getMsg().getBody();
+                MessageChargeResult result= messageReceiveEvent.getChargeResult();
+                WealthAckMessage ackMessage=new WealthAckMessage(msg.getTempID(),msg.getMid(),result.getPayerWealth(),result.getStatusCode()== ChargeResultCode.SUCCESS?true:false,result.getRelation(),result.getStatus());
+                persistStrategy.persistMessage(messageReceiveEvent.getMsg(),ackMessage);
+                status.setPersistSuccessful(true);
+                messageReceiveEvent.setWealthAckMessage(ackMessage);
+            }catch (Exception e){
+                //refund money
+                logger.warn("[CACHE_FAILED]",e);
+                status.setPersistSuccessful(false);
+            }
+        }
     }
 
-    public static PersistenceHandler[] createGroup(int size){
+    public static PersistenceHandler[] createGroup(int size,PersistStrategy strategy){
         PersistenceHandler[] group=new PersistenceHandler[size];
         for(int i=0;i<size;i++){
-            group[i]=new PersistenceHandler();
+            group[i]=new PersistenceHandler(strategy);
         }
         return group;
     }

@@ -1,8 +1,8 @@
 package online.decentworld.message.security.validate;
 
 import online.decentworld.message.cache.SecurityCache;
-import online.decentworld.message.util.AES;
-import online.decentworld.message.util.MD5;
+import online.decentworld.tools.AES;
+import online.decentworld.tools.MD5;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

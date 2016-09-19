@@ -2,12 +2,14 @@ package online.decentworld.message.core.handlers;
 
 import com.lmax.disruptor.EventHandler;
 import com.lmax.disruptor.WorkHandler;
-import online.decentworld.message.Charge.ChargeResult;
-import online.decentworld.message.Charge.Charger;
-import online.decentworld.message.Charge.P2PChargeEvent;
-import online.decentworld.message.Charge.P2PChargeResult;
+import online.decentworld.message.charge.Charger;
+import online.decentworld.message.charge.MessageChargeResult;
+import online.decentworld.message.charge.P2PChargeEvent;
 import online.decentworld.message.common.ChargeResultCode;
 import online.decentworld.message.core.MessageReceiveEvent;
+import online.decentworld.rpc.dto.message.ChatMessage;
+import online.decentworld.rpc.dto.message.types.MessageType;
+import online.decentworld.tools.MoneyUnitConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,14 +35,31 @@ public class ChargeHandler implements EventHandler<MessageReceiveEvent>,WorkHand
     @Override
     public void onEvent(MessageReceiveEvent messageReceiveEvent) throws Exception {
         if(messageReceiveEvent.getStatus().isValidate()) {
-            P2PChargeResult result=charger.p2pCharge(new P2PChargeEvent(messageReceiveEvent.getMsg().getSender().getID(), messageReceiveEvent.getMsg().getReceiver().getID()));
-            messageReceiveEvent.setChargeResult(result);
-            if(result.getStatusCode()== ChargeResultCode.SUCCESS){
-                messageReceiveEvent.getStatus().setCanDeliver(true);
+            //only charge chat
+            if(messageReceiveEvent.getMsg().getType()== MessageType.CHAT){
+                ChatMessage cm=(ChatMessage)messageReceiveEvent.getMsg().getBody();
+                //check sender and receiver id
+                if(messageReceiveEvent.getMsg().getSender().equals(cm.getFromID())&&
+                        messageReceiveEvent.getMsg().getReceiver().equals(cm.getToID())) {
+                    MessageChargeResult result = charger.messageCharge(new P2PChargeEvent(messageReceiveEvent.getMsg().getSender(), messageReceiveEvent.getMsg().getReceiver()));
+                    messageReceiveEvent.setChargeResult(result);
+                    //set chat message charge related status
+                    cm.setRelation(result.getRelation());
+                    cm.setStatus(result.getStatus());
+                    cm.setReceiverWealth(MoneyUnitConverter.fromFenToYuanStr(result.getPayeeWealth()));
+                    if (result.getStatusCode() == ChargeResultCode.SUCCESS) {
+                        messageReceiveEvent.getStatus().setCanDeliver(true);
+                    } else {
+                        messageReceiveEvent.getStatus().setCanDeliver(false);
+                    }
+                }else{
+                    messageReceiveEvent.getStatus().setCanDeliver(false);
+                }
             }else{
-                messageReceiveEvent.getStatus().setCanDeliver(false);
+                messageReceiveEvent.getStatus().setCanDeliver(true);
             }
-
+        }else{
+            messageReceiveEvent.getStatus().setCanDeliver(false);
         }
     }
 

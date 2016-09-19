@@ -1,4 +1,4 @@
-import online.decentworld.message.Charge.IChargeService;
+import online.decentworld.message.charge.IChargeService;
 import online.decentworld.message.config.ApplicationRootConfig;
 import online.decentworld.rdb.config.DBConfig;
 import org.junit.Test;
