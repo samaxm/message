@@ -44,7 +44,9 @@ public class PersistenceHandler implements EventHandler<MessageReceiveEvent>,Wor
                 ChatMessage msg=(ChatMessage)messageReceiveEvent.getMsg().getBody();
                 MessageChargeResult result= messageReceiveEvent.getChargeResult();
                 WealthAckMessage ackMessage=new WealthAckMessage(msg.getTempID(),msg.getMid(),result.getPayerWealth(),result.getStatusCode()== ChargeResultCode.SUCCESS?true:false,result.getRelation(),result.getStatus());
-                persistStrategy.persistMessage(messageReceiveEvent.getMsg(),ackMessage);
+                long id=persistStrategy.persistMessage(messageReceiveEvent.getMsg(),ackMessage);
+                msg.setMid(id);
+                msg.setTime(System.currentTimeMillis());
                 status.setPersistSuccessful(true);
                 messageReceiveEvent.setWealthAckMessage(ackMessage);
             }catch (Exception e){

@@ -2,8 +2,6 @@ package online.decentworld.message.http;
 
 import com.lmax.disruptor.EventTranslatorOneArg;
 import com.lmax.disruptor.dsl.Disruptor;
-import online.decentworld.message.cache.MessageCache;
-import online.decentworld.message.cache.MessageSynchronizeResult;
 import online.decentworld.message.config.Common;
 import online.decentworld.message.core.MessageReceiveEvent;
 import online.decentworld.message.core.TranslateInfo;
@@ -20,7 +18,6 @@ import javax.servlet.AsyncContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.Part;
-import java.io.IOException;
 import java.util.Collection;
 
 /**
@@ -28,17 +25,17 @@ import java.util.Collection;
  */
 @Controller
 @RequestMapping(value = "/")
-public class Message {
+public class MessageController {
 
-    private static Logger logger= LoggerFactory.getLogger(Message.class);
+    private static Logger logger= LoggerFactory.getLogger(MessageController.class);
 
     @Resource(name = "messageDisruptor")
     private Disruptor<MessageReceiveEvent> disruptor;
     @Resource(name="messageEventTranslator")
     private EventTranslatorOneArg translator;
-    @Autowired
-    private MessageCache messageCache;
 
+    @Autowired
+    private SynchronizeService synchronizeService;
 
     @RequestMapping(value = "send")
     public void send(HttpServletRequest request,HttpServletResponse response){
@@ -67,26 +64,18 @@ public class Message {
                 }
                 if(token!=null&&data!=null&&tempID!=null&&userID!=null){
                     AsyncContext ctx=request.startAsync();
-                    ContextHolder.storeSendResponseCTX(ContextHolder.getResponseKey(userID,tempID),ctx);
+                    RequestHolder.storeSendRequest(RequestHolder.getResponseKey(userID, tempID),
+                            new SendMessageRequest(userID,tempID,new AsynchronizedHttpChannel(userID,ctx)));
                     TranslateInfo info=new TranslateInfo(token,data,tempID,userID);
                     disruptor.publishEvent(translator,info);
 
                 }else {
                     logger.debug("[ERROR_DATA_FORMAT]");
+                    response.setStatus(StatusCode.FAILED);
                 }
             }
         } catch (Exception e) {
             logger.debug("SEND FAILED",e);
-            response.setStatus(StatusCode.FAILED);
-            AsyncContext ctx=ContextHolder.getSendResponseCTX(ContextHolder.getResponseKey(userID, tempID));
-            if(ctx!=null){
-                try {
-                    ctx.getResponse().getWriter().write("failed");
-                    ctx.getResponse().getWriter().flush();
-                } catch (IOException e1) {
-                    logger.debug("[WRITE_RESPONSE_FAILED]",e1);
-                }
-            }
         }
     }
 
@@ -94,9 +83,8 @@ public class Message {
 
     @RequestMapping(value="sync")
     public void synchronizeMessage(long syncNum,String dwID,HttpServletRequest request,HttpServletResponse response){
-        SynchronizeRequest sr=new SynchronizeRequest();
-        MessageSynchronizeResult result=messageCache.synchronizeMessage(dwID, syncNum);
-//        result.get
+        SynchronizeRequest sr=new SynchronizeRequest(new SynchronizedHttpChannel(response,dwID),request,dwID,syncNum,false);
+         synchronizeService.handleSynchronizeRequest(sr);
     }
 
 }

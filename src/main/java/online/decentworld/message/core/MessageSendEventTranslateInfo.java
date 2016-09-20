@@ -9,12 +9,14 @@ public class MessageSendEventTranslateInfo {
     private byte[] writeData;
     private String receiverID;
     private MessageType messageType;
+    private long mid;
 
 
-    public MessageSendEventTranslateInfo(byte[] writeData, String receiverID, MessageType messageType) {
+    public MessageSendEventTranslateInfo(byte[] writeData, String receiverID, MessageType messageType, long mid) {
         this.writeData = writeData;
         this.receiverID = receiverID;
         this.messageType = messageType;
+        this.mid = mid;
     }
 
     public MessageSendEventTranslateInfo() {
@@ -43,5 +45,13 @@ public class MessageSendEventTranslateInfo {
 
     public void setReceiverID(String receiverID) {
         this.receiverID = receiverID;
+    }
+
+    public long getMid() {
+        return mid;
+    }
+
+    public void setMid(long mid) {
+        this.mid = mid;
     }
 }

@@ -10,6 +10,7 @@ public class MessageSendEvent {
     private byte[] writeData;
     private String receiverID;
     private MessageType type;
+    private Long mid;
 
     public MessageType getType() {
         return type;
@@ -35,5 +36,13 @@ public class MessageSendEvent {
 
     public void setReceiverID(String receiverID) {
         this.receiverID = receiverID;
+    }
+
+    public Long getMid() {
+        return mid;
+    }
+
+    public void setMid(Long mid) {
+        this.mid = mid;
     }
 }

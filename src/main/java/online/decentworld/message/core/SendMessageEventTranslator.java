@@ -10,5 +10,7 @@ public class SendMessageEventTranslator implements EventTranslatorOneArg<Message
     public void translateTo(MessageSendEvent messageSendEvent, long l, MessageSendEventTranslateInfo messageSendEventTranslateInfo) {
         messageSendEvent.setReceiverID(messageSendEventTranslateInfo.getReceiverID());
         messageSendEvent.setWriteData(messageSendEventTranslateInfo.getWriteData());
+        messageSendEvent.setType(messageSendEventTranslateInfo.getMessageType());
+        messageSendEvent.setMid(messageSendEventTranslateInfo.getMid());
     }
 }

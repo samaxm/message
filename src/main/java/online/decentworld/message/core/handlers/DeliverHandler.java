@@ -3,6 +3,10 @@ package online.decentworld.message.core.handlers;
 import com.lmax.disruptor.EventHandler;
 import com.lmax.disruptor.WorkHandler;
 import online.decentworld.message.core.MessageSendEvent;
+import online.decentworld.message.http.RequestHolder;
+import online.decentworld.message.http.SendMessageRequest;
+import online.decentworld.message.http.SynchronizeRequest;
+import online.decentworld.rpc.dto.message.types.MessageType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,24 +25,24 @@ public class DeliverHandler implements EventHandler<MessageSendEvent>,WorkHandle
     @Override
     public void onEvent(MessageSendEvent messageSendEvent) throws Exception {
         logger.debug("[DELIVER_MESSAGE]");
-//        AsyncContext ctx=null;
-//        if(messageSendEvent.getType()== MessageType.WEALTH_ACK){
-//            ctx=ContextHolder.getSendResponseCTX(messageSendEvent.getReceiverID());
-//        }else{
-//            ctx=ContextHolder.getSynchronizedCTX(messageSendEvent.getReceiverID());
-//        }
-//        if(ctx!=null){
-//            if(messageReceiveEvent.getStatus().isValidate()&&messageReceiveEvent.getStatus().isCanDeliver()){
-//                logger.debug("[DELIVERING_MSG_ONLINE]");
-//                ctx.getResponse().getWriter().write("test success");
-//                ctx.getResponse().getWriter().flush();
-//            }else {
-//                logger.debug("[DELIVERING_MSG_ONLINE]");
-//                ctx.getResponse().getWriter().write("test success money not enouth");
-//                ctx.getResponse().getWriter().flush();
-//            }
-//        }else{
-//            logger.debug("[LOST_CTX]");
-//        }
+        if(messageSendEvent.getType()== MessageType.WEALTH_ACK){
+            SendMessageRequest request=RequestHolder.getSendResponseCTX(messageSendEvent.getReceiverID());
+            if(request!=null&&request.getChannel()!=null){
+                request.getChannel().write(messageSendEvent.getWriteData());
+            }
+        }else{
+            SynchronizeRequest request=RequestHolder.getSynchronizedCTX(messageSendEvent.getReceiverID());
+            if(request!=null&&request.getChannel()!=null&&request.getSynchronizeNum()<messageSendEvent.getMid()){
+                request.getChannel().write(messageSendEvent.getWriteData());
+            }
+        }
+    }
+
+    public static DeliverHandler[] create(int num){
+        DeliverHandler[] handlers=new DeliverHandler[num];
+        for(int i=0;i<handlers.length;i++){
+            handlers[i]=new DeliverHandler();
+        }
+        return handlers;
     }
 }

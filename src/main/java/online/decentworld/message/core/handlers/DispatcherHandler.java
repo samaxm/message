@@ -5,7 +5,7 @@ import com.lmax.disruptor.WorkHandler;
 import com.lmax.disruptor.dsl.Disruptor;
 import online.decentworld.message.common.MessageConfig;
 import online.decentworld.message.core.*;
-import online.decentworld.message.http.ContextHolder;
+import online.decentworld.message.http.RequestHolder;
 import online.decentworld.rpc.codc.Codec;
 import online.decentworld.rpc.dto.message.ChatMessage;
 import online.decentworld.rpc.dto.message.MessageWrapper;
@@ -24,10 +24,12 @@ public class DispatcherHandler implements EventHandler<MessageReceiveEvent>,Work
     private SendMessageEventTranslator translator;
     private Codec codec;
 
-
-    public DispatcherHandler(Disruptor<MessageSendEvent> disruptor) {
+    public DispatcherHandler(Disruptor<MessageSendEvent> disruptor, SendMessageEventTranslator translator, Codec codec) {
         this.disruptor = disruptor;
+        this.translator = translator;
+        this.codec = codec;
     }
+
     public DispatcherHandler() {
     }
 
@@ -38,30 +40,30 @@ public class DispatcherHandler implements EventHandler<MessageReceiveEvent>,Work
 
     @Override
     public void onEvent(MessageReceiveEvent messageReceiveEvent) throws Exception {
-        logger.debug("[DELIVERING_MSG]");
+        logger.debug("[DISPATCHER_MSG]");
         MessageStatus status=messageReceiveEvent.getStatus();
         if(status.isValidate()&&status.isCanDeliver()){
             if(messageReceiveEvent.getMsg().getType()== MessageType.CHAT){
                 ChatMessage cm=(ChatMessage)messageReceiveEvent.getMsg().getBody();
                 if(status.isPersistSuccessful()){
-                    MessageSendEventTranslateInfo info=new MessageSendEventTranslateInfo(codec.encode(messageReceiveEvent.getMsg()),messageReceiveEvent.getMsg().getReceiver(),messageReceiveEvent.getMsg().getType());
+                    MessageSendEventTranslateInfo info=new MessageSendEventTranslateInfo(codec.encode(messageReceiveEvent.getMsg()),messageReceiveEvent.getMsg().getReceiver(),messageReceiveEvent.getMsg().getType(),cm.getMid());
                     disruptor.publishEvent(translator,info);
                     MessageSendEventTranslateInfo ack=new MessageSendEventTranslateInfo(codec.encode(new MessageWrapper(MessageConfig.SYSTEM_MESSAGE_SENDER,messageReceiveEvent.getMsg().getSender(),MessageType.WEALTH_ACK,messageReceiveEvent.getWealthAckMessage())),
-                            ContextHolder.getResponseKey(cm.getFromID(),cm.getTempID()),MessageType.WEALTH_ACK);
+                            RequestHolder.getResponseKey(cm.getFromID(), cm.getTempID()),MessageType.WEALTH_ACK,cm.getMid());
                     disruptor.publishEvent(translator,ack);
                 }
             }else{
-                MessageSendEventTranslateInfo info=new MessageSendEventTranslateInfo(codec.encode(messageReceiveEvent.getMsg()),messageReceiveEvent.getMsg().getReceiver(),messageReceiveEvent.getMsg().getType());
+                MessageSendEventTranslateInfo info=new MessageSendEventTranslateInfo(codec.encode(messageReceiveEvent.getMsg()),messageReceiveEvent.getMsg().getReceiver(),messageReceiveEvent.getMsg().getType(),0);
                 disruptor.publishEvent(translator,info);
             }
         }
 
     }
 
-    public static DispatcherHandler[] createGroup(int size,Disruptor<MessageSendEvent> disruptor){
+    public static DispatcherHandler[] createGroup(int size,Disruptor<MessageSendEvent> disruptor,SendMessageEventTranslator translator,Codec codec){
         DispatcherHandler[] group=new DispatcherHandler[size];
         for(int i=0;i<size;i++){
-            group[i]=new DispatcherHandler(disruptor);
+            group[i]=new DispatcherHandler(disruptor,translator,codec);
         }
         return group;
     }

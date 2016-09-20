@@ -15,6 +15,12 @@ public class CleanHandler implements EventHandler<MessageReceiveEvent>,WorkHandl
 
     private static Logger logger= LoggerFactory.getLogger(CleanHandler.class);
     private static Field[] fields=MessageReceiveEvent.class.getDeclaredFields();
+
+    static{
+        for(Field field:fields){
+            field.setAccessible(true);
+        }
+    }
     @Override
     public void onEvent(MessageReceiveEvent messageReceiveEvent, long l, boolean b) throws Exception {
         onEvent(messageReceiveEvent);

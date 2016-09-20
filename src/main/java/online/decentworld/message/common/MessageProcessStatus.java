@@ -5,9 +5,9 @@ package online.decentworld.message.common;
  */
 public enum MessageProcessStatus {
 
-    SENDED,RECEIVED;
+    S,R;
 
     public static void main(String[] args) {
-        System.out.println(MessageProcessStatus.SENDED.name());
+        System.out.println(MessageProcessStatus.S.name());
     }
 }

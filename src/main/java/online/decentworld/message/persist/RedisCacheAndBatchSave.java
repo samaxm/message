@@ -17,7 +17,7 @@ public class RedisCacheAndBatchSave implements PersistStrategy {
     private MessageCache messageCache;
 
     @Override
-    public void persistMessage(MessageWrapper msg,WealthAckMessage wealthAckMessage) throws PersistMessageFailException {
-        messageCache.cacheMessage(msg,wealthAckMessage);
+    public long persistMessage(MessageWrapper msg,WealthAckMessage wealthAckMessage) throws PersistMessageFailException {
+        return messageCache.cacheMessage(msg,wealthAckMessage);
     }
 }

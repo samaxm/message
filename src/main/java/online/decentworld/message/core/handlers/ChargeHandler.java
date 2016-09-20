@@ -47,6 +47,7 @@ public class ChargeHandler implements EventHandler<MessageReceiveEvent>,WorkHand
                     cm.setRelation(result.getRelation());
                     cm.setStatus(result.getStatus());
                     cm.setReceiverWealth(MoneyUnitConverter.fromFenToYuanStr(result.getPayeeWealth()));
+                    cm.setTempID(messageReceiveEvent.getTempID());
                     if (result.getStatusCode() == ChargeResultCode.SUCCESS) {
                         messageReceiveEvent.getStatus().setCanDeliver(true);
                     } else {
