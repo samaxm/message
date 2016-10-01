@@ -28,6 +28,7 @@ public class DeliverHandler implements EventHandler<MessageSendEvent>,WorkHandle
         if(messageSendEvent.getType()== MessageType.WEALTH_ACK){
             SendMessageRequest request=RequestHolder.getSendResponseCTX(messageSendEvent.getReceiverID());
             if(request!=null&&request.getChannel()!=null){
+                logger.debug("[send--->]");
                 request.getChannel().write(messageSendEvent.getWriteData());
             }
         }else{

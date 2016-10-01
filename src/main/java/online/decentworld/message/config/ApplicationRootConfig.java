@@ -16,6 +16,9 @@ import online.decentworld.rpc.codc.protos.SimpleProtosCodec;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.CacheManager;
+import org.springframework.cache.annotation.EnableCaching;
+import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
 import org.springframework.context.annotation.*;
 import org.springframework.context.annotation.ComponentScan.Filter;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
@@ -36,6 +39,7 @@ import java.util.concurrent.Executors;
 })
 @EnableTransactionManagement
 @Import(value = {DBConfig.class,CacheBeanConfig.class})
+@EnableCaching
 public class ApplicationRootConfig {
 	
 	@SuppressWarnings("unused")
@@ -43,8 +47,16 @@ public class ApplicationRootConfig {
 
 
 
+
 	@Autowired
 	private PersistStrategy persistStrategy;
+
+
+	@Bean
+	public CacheManager getCacheManager(){
+		return new ConcurrentMapCacheManager();
+	}
+
 
 	@Bean
 	public DataSourceTransactionManager getTXManager(DataSource ds){

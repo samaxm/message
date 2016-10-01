@@ -1,6 +1,6 @@
 <c3p0-config>
   <!-- 本地测试数据库-->
-  <named-config name="local_develop"> 
+  <named-config name="LOCAL">
     <property name="acquireIncrement">10</property>
     <property name="initialPoolSize">5</property>
     <property name="minPoolSize">5</property>
@@ -18,7 +18,7 @@
   
   
    <!-- 云端测试数据库 -->
-  <named-config name="server_develop"> 
+  <named-config name="SERVER">
     <property name="acquireIncrement">10</property>
     <property name="initialPoolSize">5</property>
     <property name="minPoolSize">5</property>

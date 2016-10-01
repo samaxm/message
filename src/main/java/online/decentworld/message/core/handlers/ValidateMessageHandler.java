@@ -26,9 +26,10 @@ public class ValidateMessageHandler implements EventHandler<MessageReceiveEvent>
 
     @Override
     public void onEvent(MessageReceiveEvent messageReceiveEvent) throws Exception {
-        if(validate.validate(messageReceiveEvent.getInfo(),messageReceiveEvent.getData())){
-            messageReceiveEvent.getStatus().setValidate(true);
-        }
+//        if(validate.validate(messageReceiveEvent.getInfo(),messageReceiveEvent.getData())){
+//            messageReceiveEvent.getStatus().setValidate(true);
+//        }
+        messageReceiveEvent.getStatus().setValidate(true);
     }
 
     @Override
