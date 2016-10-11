@@ -1,6 +1,6 @@
 package online.decentworld.message.core;
 
-import online.decentworld.message.charge.MessageChargeResult;
+import online.decentworld.charge.receipt.MessageReceipt;
 import online.decentworld.message.security.validate.ValidateInfo;
 import online.decentworld.rpc.dto.message.MessageWrapper;
 import online.decentworld.rpc.dto.message.WealthAckMessage;
@@ -33,7 +33,7 @@ public class MessageReceiveEvent {
     /**
      * charge result if the msg need to be charged
      */
-    private MessageChargeResult chargeResult;
+    private MessageReceipt messageReceipt;
     /**
      * receive data
      */
@@ -93,12 +93,12 @@ public class MessageReceiveEvent {
         this.userID = userID;
     }
 
-    public MessageChargeResult getChargeResult() {
-        return chargeResult;
+    public MessageReceipt getMessageReceipt() {
+        return messageReceipt;
     }
 
-    public void setChargeResult(MessageChargeResult chargeResult) {
-        this.chargeResult = chargeResult;
+    public void setMessageReceipt(MessageReceipt messageReceipt) {
+        this.messageReceipt = messageReceipt;
     }
 
     public byte[] getData() {

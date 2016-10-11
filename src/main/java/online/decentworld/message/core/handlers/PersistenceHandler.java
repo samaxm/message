@@ -2,8 +2,8 @@ package online.decentworld.message.core.handlers;
 
 import com.lmax.disruptor.EventHandler;
 import com.lmax.disruptor.WorkHandler;
-import online.decentworld.message.charge.MessageChargeResult;
-import online.decentworld.message.common.ChargeResultCode;
+import online.decentworld.charge.ChargeResultCode;
+import online.decentworld.charge.receipt.MessageReceipt;
 import online.decentworld.message.core.MessageReceiveEvent;
 import online.decentworld.message.core.MessageStatus;
 import online.decentworld.message.persist.PersistStrategy;
@@ -42,8 +42,8 @@ public class PersistenceHandler implements EventHandler<MessageReceiveEvent>,Wor
         if(status.isValidate()&&messageReceiveEvent.getMsg().getType()== MessageType.CHAT){
             try{
                 ChatMessage msg=(ChatMessage)messageReceiveEvent.getMsg().getBody();
-                MessageChargeResult result= messageReceiveEvent.getChargeResult();
-                WealthAckMessage ackMessage=new WealthAckMessage(msg.getTempID(),msg.getMid(),result.getPayerWealth(),result.getStatusCode()== ChargeResultCode.SUCCESS?true:false,result.getRelation(),result.getStatus());
+                MessageReceipt receipt= messageReceiveEvent.getMessageReceipt();
+                WealthAckMessage ackMessage=new WealthAckMessage(msg.getTempID(),msg.getMid(),receipt.getChargeResult().getPayerWealth(),receipt.getChargeResult().getStatusCode()== ChargeResultCode.SUCCESS?true:false,receipt.getChatRelation(),receipt.getChatStatus());
                 long id=persistStrategy.persistMessage(messageReceiveEvent.getMsg(),ackMessage);
                 msg.setMid(id);
                 msg.setTime(System.currentTimeMillis());

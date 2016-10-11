@@ -2,13 +2,18 @@ package online.decentworld.message.config;
 
 import com.lmax.disruptor.dsl.Disruptor;
 import online.decentworld.cache.config.CacheBeanConfig;
-import online.decentworld.message.charge.*;
+import online.decentworld.charge.ChargeService;
+import online.decentworld.charge.ChargeServiceTemplate;
+import online.decentworld.message.cache.LocalUserContactCache;
 import online.decentworld.message.core.MessageReceiveEvent;
 import online.decentworld.message.core.MessageSendEvent;
 import online.decentworld.message.core.SendMessageEventTranslator;
 import online.decentworld.message.core.handlers.*;
 import online.decentworld.message.persist.PersistStrategy;
 import online.decentworld.rdb.config.DBConfig;
+import online.decentworld.rdb.mapper.ConsumePriceMapper;
+import online.decentworld.rdb.mapper.OrderMapper;
+import online.decentworld.rdb.mapper.WealthMapper;
 import online.decentworld.rpc.codc.Codec;
 import online.decentworld.rpc.codc.protos.ProtosBodyConverterFactory;
 import online.decentworld.rpc.codc.protos.ReflectBodyConverterFactory;
@@ -16,9 +21,7 @@ import online.decentworld.rpc.codc.protos.SimpleProtosCodec;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
-import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
 import org.springframework.context.annotation.*;
 import org.springframework.context.annotation.ComponentScan.Filter;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
@@ -45,17 +48,8 @@ public class ApplicationRootConfig {
 	@SuppressWarnings("unused")
 	private static Logger logger=LoggerFactory.getLogger(ApplicationRootConfig.class);
 
-
-
-
 	@Autowired
 	private PersistStrategy persistStrategy;
-
-
-	@Bean
-	public CacheManager getCacheManager(){
-		return new ConcurrentMapCacheManager();
-	}
 
 
 	@Bean
@@ -65,27 +59,17 @@ public class ApplicationRootConfig {
 		return manager;
 	}
 
-	@Bean
-	public PriceCounter getPriceCounter(){
-		return new DefaultPriceCounter();
-	}
-
-	@Bean
-	public IChargeService getChargeService(){
-		return new ChargeService();
-	}
-
 	@Bean(name = "messageDisruptor")
-	public Disruptor<MessageReceiveEvent> getDisruptor(Charger charger,Disruptor<MessageSendEvent> sendEventDisruptor,ValidateMessageHandler validateMessageHandler
-	, DecodeHandler decodeHandler,PersistStrategy persistStrategy,Codec codec
+	public Disruptor<MessageReceiveEvent> getDisruptor(online.decentworld.charge.ChargeService charger,Disruptor<MessageSendEvent> sendEventDisruptor,ValidateMessageHandler validateMessageHandler
+	, DecodeHandler decodeHandler,PersistStrategy persistStrategy,Codec codec,LocalUserContactCache localUserContactCache
 	){
 		Executor executor= Executors.newCachedThreadPool();
 		Disruptor<MessageReceiveEvent> disruptor=new Disruptor<MessageReceiveEvent>(MessageReceiveEvent::new,1024,executor);
 		disruptor.handleEventsWith(validateMessageHandler)
 				.then(decodeHandler)
-				.then(new LogHandler())
 				.thenHandleEventsWithWorkerPool(ChargeHandler.createGroup(4,charger))
 				.thenHandleEventsWithWorkerPool(PersistenceHandler.createGroup(4,persistStrategy))
+				.then(new LogHandler(localUserContactCache))
 				.thenHandleEventsWithWorkerPool(DispatcherHandler.createGroup(2, sendEventDisruptor,new SendMessageEventTranslator(),codec))
 				.then(new CleanHandler());
 		disruptor.setDefaultExceptionHandler(new DefaultExceptionHandler());
@@ -113,7 +97,6 @@ public class ApplicationRootConfig {
 		return codec;
 	}
 
-
 	@Bean
 	public ProtosBodyConverterFactory codecFactory(){
 		return new ReflectBodyConverterFactory();
@@ -121,9 +104,7 @@ public class ApplicationRootConfig {
 
 
 	@Bean
-	public Charger getCharger(IChargeService chargeService,PriceCounter priceCounter){
-		return  new Charger(chargeService,priceCounter);
+	public ChargeService getChargeService(WealthMapper wealthMapper,ConsumePriceMapper consumePriceMapper,OrderMapper orderMapper){
+		return ChargeServiceTemplate.defaultService(wealthMapper,consumePriceMapper,orderMapper);
 	}
-
-
 }

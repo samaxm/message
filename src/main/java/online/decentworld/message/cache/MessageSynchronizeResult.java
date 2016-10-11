@@ -32,4 +32,6 @@ public class MessageSynchronizeResult {
     public void setNotices(List<byte[]> notices) {
         this.notices = notices;
     }
+
+
 }

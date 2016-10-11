@@ -11,7 +11,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <!-- spring版本号 -->
-        <spring.version>4.1.6.RELEASE</spring.version>
+        <spring.version>4.3.2.RELEASE</spring.version>
         <!-- slf4j日志文件管理包版本 -->
         <slf4j.version>1.7.10</slf4j.version>
     </properties>
@@ -275,6 +275,11 @@
             <groupId>online.decentworld</groupId>
             <artifactId>rdb</artifactId>
             <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>online.decentworld</groupId>
+            <artifactId>charge</artifactId>
+            <version>1.0</version>
         </dependency>
         <dependency>
             <groupId>online.decentworld</groupId>

@@ -13,6 +13,7 @@ public class MessageCacheKey extends CacheKey{
 
     private static String CONSUMEABLE_MESSAGE_CACHE_PREFIX="mailbox";
 
+
     public static String getUserMessageCacheKey(String dwID){
         return (CHAT_CACHE_PREFIX+SEPARATOR+dwID);
     }

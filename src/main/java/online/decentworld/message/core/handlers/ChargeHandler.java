@@ -2,14 +2,13 @@ package online.decentworld.message.core.handlers;
 
 import com.lmax.disruptor.EventHandler;
 import com.lmax.disruptor.WorkHandler;
-import online.decentworld.message.charge.Charger;
-import online.decentworld.message.charge.MessageChargeResult;
-import online.decentworld.message.charge.P2PChargeEvent;
-import online.decentworld.message.common.ChargeResultCode;
+import online.decentworld.charge.ChargeService;
+import online.decentworld.charge.charger.P2PChargeResult;
+import online.decentworld.charge.event.PlainMessageChargeEvent;
+import online.decentworld.charge.receipt.MessageReceipt;
 import online.decentworld.message.core.MessageReceiveEvent;
 import online.decentworld.rpc.dto.message.ChatMessage;
 import online.decentworld.rpc.dto.message.types.MessageType;
-import online.decentworld.tools.MoneyUnitConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,9 +19,9 @@ public class ChargeHandler implements EventHandler<MessageReceiveEvent>,WorkHand
 
     private static Logger logger= LoggerFactory.getLogger(ChargeHandler.class);
 
-    private Charger charger;
+    private ChargeService charger;
 
-    public ChargeHandler(Charger charger) {
+    public ChargeHandler(ChargeService charger) {
         super();
         this.charger = charger;
     }
@@ -41,14 +40,15 @@ public class ChargeHandler implements EventHandler<MessageReceiveEvent>,WorkHand
                 //check sender and receiver id
                 if(messageReceiveEvent.getMsg().getSender().equals(cm.getFromID())&&
                         messageReceiveEvent.getMsg().getReceiver().equals(cm.getToID())) {
-                    MessageChargeResult result = charger.messageCharge(new P2PChargeEvent(messageReceiveEvent.getMsg().getSender(), messageReceiveEvent.getMsg().getReceiver()));
-                    messageReceiveEvent.setChargeResult(result);
+                    MessageReceipt receipt = (MessageReceipt)charger.charge(new PlainMessageChargeEvent(cm.getFromID(),cm.getToID()));
+                    P2PChargeResult result=receipt.getChargeResult();
+                    messageReceiveEvent.setMessageReceipt(receipt);
                     //set chat message charge related status
-                    cm.setRelation(result.getRelation());
-                    cm.setStatus(result.getStatus());
-                    cm.setReceiverWealth(MoneyUnitConverter.fromFenToYuanStr(result.getPayeeWealth()));
+                    cm.setRelation(receipt.getChatRelation());
+                    cm.setStatus(receipt.getChatStatus());
+                    cm.setReceiverWealth(String.valueOf(result.getPayeeWealth()));
                     cm.setTempID(messageReceiveEvent.getTempID());
-                    if (result.getStatusCode() == ChargeResultCode.SUCCESS) {
+                    if (result.getStatusCode() == online.decentworld.charge.ChargeResultCode.SUCCESS) {
                         messageReceiveEvent.getStatus().setCanDeliver(true);
                     } else {
                         messageReceiveEvent.getStatus().setCanDeliver(false);
@@ -64,7 +64,7 @@ public class ChargeHandler implements EventHandler<MessageReceiveEvent>,WorkHand
         }
     }
 
-    public static ChargeHandler[] createGroup(int size,Charger charger){
+    public static ChargeHandler[] createGroup(int size,ChargeService charger){
         ChargeHandler[] group=new ChargeHandler[size];
         for(int i=0;i<size;i++){
             group[i]=new ChargeHandler(charger);

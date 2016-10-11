@@ -36,6 +36,7 @@ public class SynchronizeRequest {
         if(!isAsynchronized){
             isAsynchronized=true;
             AsyncContext ctx=request.startAsync();
+            ctx.setTimeout(320*1000);
             this.setChannel(new AsynchronizedHttpChannel(dwID,ctx));
         }
     }
