@@ -9,7 +9,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -24,25 +23,18 @@ public class SynchronizeService {
 
     public void handleSynchronizeRequest(SynchronizeRequest request){
         MessageSynchronizeResult result=messageCache.synchronizeMessage(request.getDwID(), request.getSynchronizeNum());
-        List<byte[]> writable=new LinkedList<>();
         if(result!=null){
             List<byte[]> messaages=result.getMessages();
-            List<byte[]> notices=result.getNotices();
             if(messaages!=null&&messaages.size()!=0){
-                writable.addAll(messaages);
-            }
-            if(notices!=null&&notices.size()!=0){
-                writable.addAll(notices);
+                logger.debug("[WRITE]");
+                request.getChannel().write(CodecHelper.toByteArray(messaages, MessageConfig.SYSTEM_MESSAGE_SENDER, request.getDwID()));
+            }else{
+                logger.debug("[WAIT]");
+                request.startAsy();
+                RequestHolder.storeSynchronizeRequest(request.getDwID(), request);
             }
         }
-        if(writable.size()!=0){
-            logger.debug("[WRITE]");
-            request.getChannel().write(CodecHelper.toByteArray(writable, MessageConfig.SYSTEM_MESSAGE_SENDER, request.getDwID()));
-        }else{
-            logger.debug("[WAIT]");
-            request.startAsy();
-            RequestHolder.storeSynchronizeRequest(request.getDwID(), request);
-        }
+
     }
 
 }

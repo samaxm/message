@@ -8,6 +8,7 @@ import online.decentworld.message.core.MessageReceiveEvent;
 import online.decentworld.message.core.MessageStatus;
 import online.decentworld.message.persist.PersistStrategy;
 import online.decentworld.rpc.dto.message.ChatMessage;
+import online.decentworld.rpc.dto.message.MessageWrapper;
 import online.decentworld.rpc.dto.message.WealthAckMessage;
 import online.decentworld.rpc.dto.message.types.MessageType;
 import org.slf4j.Logger;
@@ -39,16 +40,18 @@ public class PersistenceHandler implements EventHandler<MessageReceiveEvent>,Wor
         logger.debug("[SAVING TO DB---->]");
         MessageStatus status=messageReceiveEvent.getStatus();
         //only persist validate chat msg
-        if(status.isValidate()&&messageReceiveEvent.getMsg().getType()== MessageType.CHAT){
+        if(status.isValidate()&&status.isCanDeliver()){
             try{
-                ChatMessage msg=(ChatMessage)messageReceiveEvent.getMsg().getBody();
-                MessageReceipt receipt= messageReceiveEvent.getMessageReceipt();
-                WealthAckMessage ackMessage=new WealthAckMessage(msg.getTempID(),msg.getMid(),receipt.getChargeResult().getPayerWealth(),receipt.getChargeResult().getStatusCode()== ChargeResultCode.SUCCESS?true:false,receipt.getChatRelation(),receipt.getChatStatus());
-                long id=persistStrategy.persistMessage(messageReceiveEvent.getMsg(),ackMessage);
-                msg.setMid(id);
-                msg.setTime(System.currentTimeMillis());
+                WealthAckMessage ackMessage=null;
+                if(messageReceiveEvent.getMsg().getType()== MessageType.CHAT) {
+                    //chat message should save ack
+                    ChatMessage msg = (ChatMessage) messageReceiveEvent.getMsg().getBody();
+                    MessageReceipt receipt = messageReceiveEvent.getMessageReceipt();
+                    ackMessage = new WealthAckMessage(msg.getTempID(), 0, receipt.getChargeResult().getPayerWealth(), receipt.getChargeResult().getStatusCode() == ChargeResultCode.SUCCESS ? true : false, receipt.getChatRelation(), receipt.getChatStatus());
+                    messageReceiveEvent.setWealthAckMessage(ackMessage);
+                }
+                MessageWrapper msg = persistStrategy.persistMessage(messageReceiveEvent.getMsg(), ackMessage);
                 status.setPersistSuccessful(true);
-                messageReceiveEvent.setWealthAckMessage(ackMessage);
             }catch (Exception e){
                 //refund money
                 logger.warn("[CACHE_FAILED]",e);

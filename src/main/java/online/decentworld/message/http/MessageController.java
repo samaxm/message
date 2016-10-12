@@ -83,6 +83,7 @@ public class MessageController {
 
     @RequestMapping(value="sync")
     public void synchronizeMessage(long syncNum,String dwID,HttpServletRequest request,HttpServletResponse response){
+        logger.debug("[SYNC_MESSAGE] syncNum#"+syncNum+" dwID#"+dwID);
         SynchronizeRequest sr=new SynchronizeRequest(new SynchronizedHttpChannel(response,dwID),request,dwID,syncNum,false);
          synchronizeService.handleSynchronizeRequest(sr);
     }
