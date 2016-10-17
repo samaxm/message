@@ -22,6 +22,7 @@ public class Face2FaceWebAppInitializer extends AbstractAnnotationConfigDispatch
 	
 	@Override
 	protected Class<?>[] getRootConfigClasses() {
+		System.out.println("================================================");
 		Class<?>[] rootConfig={ApplicationRootConfig.class};
 		logger.debug("[LOADING ROOT] ROOT#"+toLogString(rootConfig));
 		return rootConfig;

@@ -40,7 +40,7 @@ public class PersistenceHandler implements EventHandler<MessageReceiveEvent>,Wor
         logger.debug("[SAVING TO DB---->]");
         MessageStatus status=messageReceiveEvent.getStatus();
         //only persist validate chat msg
-        if(status.isValidate()&&status.isCanDeliver()){
+        if(status.isValidate()){
             try{
                 WealthAckMessage ackMessage=null;
                 if(messageReceiveEvent.getMsg().getType()== MessageType.CHAT) {
@@ -49,6 +49,7 @@ public class PersistenceHandler implements EventHandler<MessageReceiveEvent>,Wor
                     MessageReceipt receipt = messageReceiveEvent.getMessageReceipt();
                     ackMessage = new WealthAckMessage(msg.getTempID(), 0, receipt.getChargeResult().getPayerWealth(), receipt.getChargeResult().getStatusCode() == ChargeResultCode.SUCCESS ? true : false, receipt.getChatRelation(), receipt.getChatStatus());
                     messageReceiveEvent.setWealthAckMessage(ackMessage);
+
                 }
                 MessageWrapper msg = persistStrategy.persistMessage(messageReceiveEvent.getMsg(), ackMessage);
                 status.setPersistSuccessful(true);

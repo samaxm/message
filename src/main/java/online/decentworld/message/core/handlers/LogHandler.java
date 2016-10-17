@@ -36,7 +36,7 @@ public class LogHandler implements EventHandler<MessageReceiveEvent>,WorkHandler
     @Override
     public void onEvent(MessageReceiveEvent messageReceiveEvent) throws Exception {
         logger.debug("[CHECKING_CONTACTS]");
-        if(messageReceiveEvent.getMsg().getType()== MessageType.CHAT&&messageReceiveEvent.getStatus().isCanDeliver()){
+        if(messageReceiveEvent.getMsg().getType()== MessageType.CHAT){
             ChatMessage cm=(ChatMessage)messageReceiveEvent.getMsg().getBody();
             userContactCache.checkContacts(cm.getToID(), cm.getFromID(), cm.getRelation());
         }

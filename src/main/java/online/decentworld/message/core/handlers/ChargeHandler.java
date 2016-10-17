@@ -2,6 +2,7 @@ package online.decentworld.message.core.handlers;
 
 import com.lmax.disruptor.EventHandler;
 import com.lmax.disruptor.WorkHandler;
+import online.decentworld.charge.ChargeResultCode;
 import online.decentworld.charge.ChargeService;
 import online.decentworld.charge.charger.P2PChargeResult;
 import online.decentworld.charge.event.PlainMessageChargeEvent;
@@ -48,19 +49,13 @@ public class ChargeHandler implements EventHandler<MessageReceiveEvent>,WorkHand
                     cm.setStatus(receipt.getChatStatus());
                     cm.setReceiverWealth(String.valueOf(result.getPayeeWealth()));
                     cm.setTempID(messageReceiveEvent.getTempID());
-                    if (result.getStatusCode() == online.decentworld.charge.ChargeResultCode.SUCCESS) {
-                        messageReceiveEvent.getStatus().setCanDeliver(true);
-                    } else {
-                        messageReceiveEvent.getStatus().setCanDeliver(false);
+                    if(result.getStatusCode()!= ChargeResultCode.SUCCESS){
+                        messageReceiveEvent.setMsg(null);
                     }
                 }else{
-                    messageReceiveEvent.getStatus().setCanDeliver(false);
+                    messageReceiveEvent.getStatus().setValidate(false);
                 }
-            }else{
-                messageReceiveEvent.getStatus().setCanDeliver(true);
             }
-        }else{
-            messageReceiveEvent.getStatus().setCanDeliver(false);
         }
     }
 

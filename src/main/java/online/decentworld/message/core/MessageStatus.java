@@ -7,7 +7,6 @@ public class MessageStatus {
 
     private boolean isValidate;
     private boolean isPersistSuccessful;
-    private boolean canDeliver;
 
     public static MessageStatus INITSTATUS(){
         return new MessageStatus(false,false);
@@ -18,7 +17,6 @@ public class MessageStatus {
 
     public MessageStatus(boolean isValidate, boolean canDeliver) {
         this.isValidate = isValidate;
-        this.canDeliver = canDeliver;
     }
 
     public boolean isValidate() {
@@ -29,13 +27,6 @@ public class MessageStatus {
         this.isValidate = isValidate;
     }
 
-    public boolean isCanDeliver() {
-        return canDeliver;
-    }
-
-    public void setCanDeliver(boolean canDeliver) {
-        this.canDeliver = canDeliver;
-    }
 
     public boolean isPersistSuccessful() {
         return isPersistSuccessful;

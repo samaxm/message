@@ -9,6 +9,8 @@ import online.decentworld.message.core.MessageReceiveEvent;
 import online.decentworld.message.core.MessageSendEvent;
 import online.decentworld.message.core.SendMessageEventTranslator;
 import online.decentworld.message.core.handlers.*;
+import online.decentworld.message.netty.NettyMessageServer;
+import online.decentworld.message.netty.handler.DefaultChannelInitiallizer;
 import online.decentworld.message.persist.PersistStrategy;
 import online.decentworld.rdb.config.DBConfig;
 import online.decentworld.rdb.mapper.ConsumePriceMapper;
@@ -106,5 +108,15 @@ public class ApplicationRootConfig {
 	@Bean
 	public ChargeService getChargeService(WealthMapper wealthMapper,ConsumePriceMapper consumePriceMapper,OrderMapper orderMapper){
 		return ChargeServiceTemplate.defaultService(wealthMapper,consumePriceMapper,orderMapper);
+	}
+
+	@Bean
+	public NettyMessageServer startNettyMessageServer(Codec codec){
+		DefaultChannelInitiallizer defaultChannelInitiallizer=new DefaultChannelInitiallizer();
+		defaultChannelInitiallizer.setCodec(codec);
+		NettyMessageServer nettyMessageServer=new NettyMessageServer();
+		nettyMessageServer.setInitializer(defaultChannelInitiallizer);
+		nettyMessageServer.start();
+		return nettyMessageServer;
 	}
 }

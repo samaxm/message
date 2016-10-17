@@ -36,18 +36,20 @@ public class MessageCache extends RedisTemplate {
     public MessageWrapper cacheMessage(MessageWrapper msg,WealthAckMessage ack) throws PersistMessageFailException {
         ReturnResult result= cache((Jedis jedis)->{
             long id=idUtil.getID(jedis);
-            String receiverID=msg.getReceiver();
             Date time=new Date();
-            msg.setMid(id);
-            msg.setTime(time);
+            if(msg!=null){
+                String receiverID=msg.getReceiver();
+                msg.setMid(id);
+                msg.setTime(time);
+                jedis.zadd(MessageCacheKey.getUserMessageCacheKey(receiverID), id, String.valueOf(id));
+                jedis.hset(CacheKey.MESSAGE.getBytes(),String.valueOf(id).getBytes(),codec.encode(msg));
+            }
             if(ack!=null) {
                 //cache temp wealth ack for recheck
                 ack.setMid(id);
                 byte[] wealth_ack = codec.encode(new MessageWrapper("SYSTEM_MESSAGE_SENDER", msg.getReceiver(), MessageType.WEALTH_ACK, ack,time,id));
                 jedis.setex(((ChatMessage) msg.getBody()).getTempID().getBytes(), MessageCacheConfig.WEALTH_ACK_SECONDS, wealth_ack);
             }
-            jedis.zadd(MessageCacheKey.getUserMessageCacheKey(receiverID), id, String.valueOf(id));
-            jedis.hset(CacheKey.MESSAGE.getBytes(),String.valueOf(id).getBytes(),codec.encode(msg));
             return ReturnResult.result(msg);
         });
         if(!result.isSuccess()){

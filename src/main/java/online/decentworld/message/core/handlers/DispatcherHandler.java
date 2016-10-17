@@ -9,6 +9,7 @@ import online.decentworld.message.http.RequestHolder;
 import online.decentworld.rpc.codc.Codec;
 import online.decentworld.rpc.dto.message.ChatMessage;
 import online.decentworld.rpc.dto.message.MessageWrapper;
+import online.decentworld.rpc.dto.message.WealthAckMessage;
 import online.decentworld.rpc.dto.message.types.MessageType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,20 +45,25 @@ public class DispatcherHandler implements EventHandler<MessageReceiveEvent>,Work
     public void onEvent(MessageReceiveEvent messageReceiveEvent) throws Exception {
         logger.debug("[DISPATCHER_MSG]");
         MessageStatus status=messageReceiveEvent.getStatus();
-        if(status.isValidate()&&status.isCanDeliver()){
+        if(status.isValidate()){
             long mid=messageReceiveEvent.getMsg().getMid();
             String sender=messageReceiveEvent.getMsg().getSender();
             String receiver=messageReceiveEvent.getMsg().getReceiver();
             MessageType type=messageReceiveEvent.getMsg().getType();
-
             if(messageReceiveEvent.getMsg().getType()== MessageType.CHAT){
                 ChatMessage cm=(ChatMessage)messageReceiveEvent.getMsg().getBody();
                 if(status.isPersistSuccessful()){
-                    MessageSendEventTranslateInfo info=new MessageSendEventTranslateInfo(codec.encode(messageReceiveEvent.getMsg()),receiver,type,mid);
-                    disruptor.publishEvent(translator,info);
-                    MessageSendEventTranslateInfo ack=new MessageSendEventTranslateInfo(codec.encode(new MessageWrapper(MessageConfig.SYSTEM_MESSAGE_SENDER,sender,MessageType.WEALTH_ACK,messageReceiveEvent.getWealthAckMessage(),new Date(),mid)),
-                            RequestHolder.getResponseKey(cm.getFromID(), cm.getTempID()),MessageType.WEALTH_ACK,mid);
-                    disruptor.publishEvent(translator,ack);
+                    MessageWrapper msg=messageReceiveEvent.getMsg();
+                    if(msg!=null){
+                        MessageSendEventTranslateInfo info=new MessageSendEventTranslateInfo(codec.encode(msg),receiver,type,mid);
+                        disruptor.publishEvent(translator,info);
+                    }
+                    WealthAckMessage ackMessage=messageReceiveEvent.getWealthAckMessage();
+                    if(ackMessage!=null){
+                        MessageSendEventTranslateInfo ack=new MessageSendEventTranslateInfo(codec.encode(new MessageWrapper(MessageConfig.SYSTEM_MESSAGE_SENDER,sender,MessageType.WEALTH_ACK,ackMessage,new Date(),mid)),
+                                RequestHolder.getResponseKey(cm.getFromID(), cm.getTempID()),MessageType.WEALTH_ACK,mid);
+                        disruptor.publishEvent(translator,ack);
+                    }
                 }
             }else{
                 MessageSendEventTranslateInfo info=new MessageSendEventTranslateInfo(codec.encode(messageReceiveEvent.getMsg()),receiver,type,mid);
