@@ -47,21 +47,23 @@ public class DispatcherHandler implements EventHandler<MessageReceiveEvent>,Work
         MessageStatus status=messageReceiveEvent.getStatus();
         if(status.isValidate()){
             long mid=messageReceiveEvent.getMsg().getMid();
-            String sender=messageReceiveEvent.getMsg().getSender();
-            String receiver=messageReceiveEvent.getMsg().getReceiver();
+            String sender=messageReceiveEvent.getMsg().getSenderID();
+            String receiver=messageReceiveEvent.getMsg().getReceiverID();
             MessageType type=messageReceiveEvent.getMsg().getType();
-            if(messageReceiveEvent.getMsg().getType()== MessageType.CHAT){
+            if(messageReceiveEvent.getMsg().getType()== MessageType.CHAT_AUDIO||
+                    messageReceiveEvent.getMsg().getType()== MessageType.CHAT_IMAGE||
+                    messageReceiveEvent.getMsg().getType()== MessageType.CHAT_TEXT){
                 ChatMessage cm=(ChatMessage)messageReceiveEvent.getMsg().getBody();
                 if(status.isPersistSuccessful()){
                     MessageWrapper msg=messageReceiveEvent.getMsg();
-                    if(msg!=null){
+                    WealthAckMessage ackMessage=messageReceiveEvent.getWealthAckMessage();
+                    if(ackMessage==null||ackMessage.isChargeSuccess()){
                         MessageSendEventTranslateInfo info=new MessageSendEventTranslateInfo(codec.encode(msg),receiver,type,mid);
                         disruptor.publishEvent(translator,info);
                     }
-                    WealthAckMessage ackMessage=messageReceiveEvent.getWealthAckMessage();
                     if(ackMessage!=null){
-                        MessageSendEventTranslateInfo ack=new MessageSendEventTranslateInfo(codec.encode(new MessageWrapper(MessageConfig.SYSTEM_MESSAGE_SENDER,sender,MessageType.WEALTH_ACK,ackMessage,new Date(),mid)),
-                                RequestHolder.getResponseKey(cm.getFromID(), cm.getTempID()),MessageType.WEALTH_ACK,mid);
+                        MessageSendEventTranslateInfo ack=new MessageSendEventTranslateInfo(codec.encode(new MessageWrapper(MessageConfig.SYSTEM_MESSAGE_SENDER,sender,MessageType.COMMAND_WEALTH_ACK,ackMessage,new Date(),mid)),
+                                RequestHolder.getResponseKey(cm.getFromID(), cm.getTempID()),MessageType.COMMAND_WEALTH_ACK,mid);
                         disruptor.publishEvent(translator,ack);
                     }
                 }

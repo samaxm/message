@@ -37,23 +37,25 @@ public class MessageCache extends RedisTemplate {
         ReturnResult result= cache((Jedis jedis)->{
             long id=idUtil.getID(jedis);
             Date time=new Date();
-            if(msg!=null){
-                String receiverID=msg.getReceiver();
+
+            if(ack!=null) {
+                //cache temp wealth ack for recheck
+                ack.setMid(id);
+                byte[] wealth_ack = codec.encode(new MessageWrapper("SYSTEM_MESSAGE_SENDER", msg.getReceiverID(), MessageType.NOTICE_LIKE, ack,time,id));
+                jedis.setex(((ChatMessage) msg.getBody()).getTempID().getBytes(), MessageCacheConfig.WEALTH_ACK_SECONDS, wealth_ack);
+            }
+            if(ack==null||ack.isChargeSuccess()){
+                String receiverID=msg.getReceiverID();
                 msg.setMid(id);
                 msg.setTime(time);
                 jedis.zadd(MessageCacheKey.getUserMessageCacheKey(receiverID), id, String.valueOf(id));
                 jedis.hset(CacheKey.MESSAGE.getBytes(),String.valueOf(id).getBytes(),codec.encode(msg));
             }
-            if(ack!=null) {
-                //cache temp wealth ack for recheck
-                ack.setMid(id);
-                byte[] wealth_ack = codec.encode(new MessageWrapper("SYSTEM_MESSAGE_SENDER", msg.getReceiver(), MessageType.WEALTH_ACK, ack,time,id));
-                jedis.setex(((ChatMessage) msg.getBody()).getTempID().getBytes(), MessageCacheConfig.WEALTH_ACK_SECONDS, wealth_ack);
-            }
+
             return ReturnResult.result(msg);
         });
         if(!result.isSuccess()){
-            logger.warn("[ID_CACHE_FAILED] sender#"+msg.getSender()+" recevier#"+msg.getReceiver()+" data#");
+            logger.warn("[ID_CACHE_FAILED] sender#"+msg.getSenderID()+" recevier#"+msg.getReceiverID()+" data#");
             throw new PersistMessageFailException();
         }else{
             return (MessageWrapper)result.getResult();

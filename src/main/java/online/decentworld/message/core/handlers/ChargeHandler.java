@@ -36,24 +36,21 @@ public class ChargeHandler implements EventHandler<MessageReceiveEvent>,WorkHand
     public void onEvent(MessageReceiveEvent messageReceiveEvent) throws Exception {
         if(messageReceiveEvent.getStatus().isValidate()) {
             //only charge chat
-            if(messageReceiveEvent.getMsg().getType()== MessageType.CHAT){
+            if(messageReceiveEvent.getMsg().getType()== MessageType.CHAT_AUDIO||
+                    messageReceiveEvent.getMsg().getType()== MessageType.CHAT_IMAGE||
+                    messageReceiveEvent.getMsg().getType()== MessageType.CHAT_TEXT){
                 ChatMessage cm=(ChatMessage)messageReceiveEvent.getMsg().getBody();
                 //check sender and receiver id
-                if(messageReceiveEvent.getMsg().getSender().equals(cm.getFromID())&&
-                        messageReceiveEvent.getMsg().getReceiver().equals(cm.getToID())) {
-                    MessageReceipt receipt = (MessageReceipt)charger.charge(new PlainMessageChargeEvent(cm.getFromID(),cm.getToID()));
-                    P2PChargeResult result=receipt.getChargeResult();
-                    messageReceiveEvent.setMessageReceipt(receipt);
+                MessageReceipt receipt = (MessageReceipt)charger.charge(new PlainMessageChargeEvent(cm.getFromID(),cm.getToID()));
+                P2PChargeResult result=receipt.getChargeResult();
+
+                messageReceiveEvent.setMessageReceipt(receipt);
+                if(result.getStatusCode()== ChargeResultCode.SUCCESS) {
                     //set chat message charge related status
                     cm.setRelation(receipt.getChatRelation());
                     cm.setStatus(receipt.getChatStatus());
                     cm.setReceiverWealth(String.valueOf(result.getPayeeWealth()));
                     cm.setTempID(messageReceiveEvent.getTempID());
-                    if(result.getStatusCode()!= ChargeResultCode.SUCCESS){
-                        messageReceiveEvent.setMsg(null);
-                    }
-                }else{
-                    messageReceiveEvent.getStatus().setValidate(false);
                 }
             }
         }

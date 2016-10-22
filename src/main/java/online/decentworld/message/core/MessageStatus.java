@@ -6,17 +6,35 @@ package online.decentworld.message.core;
 public class MessageStatus {
 
     private boolean isValidate;
+
+    private boolean isDecoded;
     private boolean isPersistSuccessful;
 
+
+
+    public boolean isDecoded() {
+        return isDecoded;
+    }
+
+    public void setDecoded(boolean isDecoded) {
+        this.isDecoded = isDecoded;
+    }
+
+
     public static MessageStatus INITSTATUS(){
-        return new MessageStatus(false,false);
+        return new MessageStatus(false,false,false);
+    }
+    public static MessageStatus INIT_DECODED(){
+        return new MessageStatus(true,false,true);
     }
     public MessageStatus() {
 
     }
 
-    public MessageStatus(boolean isValidate, boolean canDeliver) {
+    public MessageStatus(boolean isValidate, boolean isPersistSuccessful,boolean isDecoded) {
         this.isValidate = isValidate;
+        this.isPersistSuccessful=isPersistSuccessful;
+        this.isDecoded=isDecoded;
     }
 
     public boolean isValidate() {

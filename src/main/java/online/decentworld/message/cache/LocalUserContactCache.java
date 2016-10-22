@@ -30,7 +30,6 @@ public class LocalUserContactCache {
     @Autowired
     private FriendContactMapper friendContactMapper;
 
-
     @Cacheable(cacheNames="local_friendContactCache",key = "#dwID")
     private Set<String> getUserFriendContact(String dwID){
         Set<FriendContact>set=friendContactMapper.getFriendContacts(dwID);

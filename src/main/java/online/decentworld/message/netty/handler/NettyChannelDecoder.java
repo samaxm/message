@@ -21,18 +21,9 @@ public class NettyChannelDecoder extends ByteToMessageDecoder
     @Override
     protected void decode(ChannelHandlerContext channelHandlerContext, ByteBuf msg, List<Object> list) throws Exception {
         logger.debug("[DECODING]");
-        list.add(codec.decode(msg.array()));
-//        ReferenceCountUtil.release(msg);
-//        final byte[] array;
-//        final int length = msg.readableBytes();
-//        array = new byte[length];
-//        msg.getBytes(msg.readerIndex(), array, 0, length);
-//        MessageWrapper messageWrapper=codec.decode(array);
-//        logger.debug("type#"+messageWrapper.getType());
-    }
-
-    public void setCodec(Codec codec) {
-        this.codec = codec;
+        byte[] bytes=new byte[msg.readableBytes()];
+        msg.readBytes(bytes);
+        list.add(codec.decode(bytes));
     }
 
     public NettyChannelDecoder(Codec codec) {

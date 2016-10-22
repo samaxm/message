@@ -24,23 +24,20 @@ public class NettyMessageServer {
 
 	private static Logger log= LoggerFactory.getLogger(NettyMessageServer.class);
 
-	private PooledByteBufAllocator bossAllocator;
-	private PooledByteBufAllocator workerAllocator;
+	private  PooledByteBufAllocator bossAllocator;
+	private  PooledByteBufAllocator workerAllocator;
 	private EventLoopGroup boss;
 	private EventLoopGroup worker;
 	private ServerBootstrap serverBoot;
 	private ChannelInitializer<NioSocketChannel> initializer;
-	
-	private static NettyMessageServer instance=new NettyMessageServer();
 
 	public NettyMessageServer() {
-
 		//worker增加处理idle的定时任务,5分钟初始延迟，每5秒执行检测一次
 //		worker.scheduleAtFixedRate(new CheckStatusTask(),5l*60,5l,TimeUnit.SECONDS);
 	}
 	
 	public PooledByteBufAllocator getWorkerAllocator(){
-		return instance.workerAllocator;
+		return workerAllocator;
 	}
 
 	public void setInitializer(ChannelInitializer<NioSocketChannel> initializer) {
@@ -64,7 +61,7 @@ public class NettyMessageServer {
 						.childOption(ChannelOption.SO_KEEPALIVE, true)
 						.option(ChannelOption.ALLOCATOR, bossAllocator)
 						.childOption(ChannelOption.ALLOCATOR, workerAllocator);
-				ChannelFuture future = serverBoot.bind(8888).sync();
+				ChannelFuture future = serverBoot.bind(9999).sync();
 				future.channel().closeFuture().sync();
 			} catch (Exception ex) {
 				log.error("", ex);

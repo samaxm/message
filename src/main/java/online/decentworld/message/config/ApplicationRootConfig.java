@@ -1,6 +1,7 @@
 package online.decentworld.message.config;
 
 import com.lmax.disruptor.dsl.Disruptor;
+import io.netty.channel.ChannelInitializer;
 import online.decentworld.cache.config.CacheBeanConfig;
 import online.decentworld.charge.ChargeService;
 import online.decentworld.charge.ChargeServiceTemplate;
@@ -10,15 +11,14 @@ import online.decentworld.message.core.MessageSendEvent;
 import online.decentworld.message.core.SendMessageEventTranslator;
 import online.decentworld.message.core.handlers.*;
 import online.decentworld.message.netty.NettyMessageServer;
-import online.decentworld.message.netty.handler.DefaultChannelInitiallizer;
 import online.decentworld.message.persist.PersistStrategy;
 import online.decentworld.rdb.config.DBConfig;
 import online.decentworld.rdb.mapper.ConsumePriceMapper;
 import online.decentworld.rdb.mapper.OrderMapper;
 import online.decentworld.rdb.mapper.WealthMapper;
 import online.decentworld.rpc.codc.Codec;
-import online.decentworld.rpc.codc.protos.ProtosBodyConverterFactory;
-import online.decentworld.rpc.codc.protos.ReflectBodyConverterFactory;
+import online.decentworld.rpc.codc.MessageConverterFactory;
+import online.decentworld.rpc.codc.ReflectConverterFactory;
 import online.decentworld.rpc.codc.protos.SimpleProtosCodec;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,6 +30,7 @@ import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
+import javax.annotation.Resource;
 import javax.sql.DataSource;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -93,15 +94,15 @@ public class ApplicationRootConfig {
 
 
 	@Bean(name = "protosCodec")
-	public Codec getCodec(ProtosBodyConverterFactory codecFactory){
+	public Codec getCodec(MessageConverterFactory codecFactory){
 		SimpleProtosCodec codec= new SimpleProtosCodec();
 		codec.setConverterFactory(codecFactory);
 		return codec;
 	}
 
 	@Bean
-	public ProtosBodyConverterFactory codecFactory(){
-		return new ReflectBodyConverterFactory();
+	public MessageConverterFactory codecFactory(){
+		return new ReflectConverterFactory();
 	}
 
 
@@ -110,10 +111,11 @@ public class ApplicationRootConfig {
 		return ChargeServiceTemplate.defaultService(wealthMapper,consumePriceMapper,orderMapper);
 	}
 
+	@Resource(name = "defaultChannelInitiallizer")
+	private ChannelInitializer defaultChannelInitiallizer;
+
 	@Bean
-	public NettyMessageServer startNettyMessageServer(Codec codec){
-		DefaultChannelInitiallizer defaultChannelInitiallizer=new DefaultChannelInitiallizer();
-		defaultChannelInitiallizer.setCodec(codec);
+	public NettyMessageServer startNettyMessageServer(){
 		NettyMessageServer nettyMessageServer=new NettyMessageServer();
 		nettyMessageServer.setInitializer(defaultChannelInitiallizer);
 		nettyMessageServer.start();

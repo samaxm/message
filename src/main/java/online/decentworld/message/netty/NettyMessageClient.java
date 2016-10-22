@@ -9,10 +9,6 @@ import io.netty.channel.ChannelOption;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import online.decentworld.message.netty.handler.NettyClientChannelHandlerInitializer;
-import online.decentworld.rpc.codc.protos.ReflectBodyConverterFactory;
-import online.decentworld.rpc.codc.protos.SimpleProtosCodec;
-import online.decentworld.rpc.dto.message.MessageWrapper;
-import online.decentworld.rpc.dto.message.MessageWrapperFactory;
 
 /**
  * Created by Sammax on 2016/10/17.
@@ -31,7 +27,7 @@ public class NettyMessageClient  {
         boot
                 .group(clientWorker)
                 .channel(NioSocketChannel.class)
-                .remoteAddress("192.168.1.198", 8888)
+                .remoteAddress("192.168.1.198", 9999)
                 .handler(new NettyClientChannelHandlerInitializer())
                 .option(ChannelOption.SO_KEEPALIVE, true)
                 .option(ChannelOption.ALLOCATOR, allocator);
@@ -65,15 +61,15 @@ public class NettyMessageClient  {
 
         Thread.sleep(2000);
 
-        SimpleProtosCodec codec=new SimpleProtosCodec();
-        codec.setConverterFactory(new ReflectBodyConverterFactory());
-
-        client.clientWorker.submit(new Runnable() {
-            @Override
-            public void run() {
-                MessageWrapper mw=MessageWrapperFactory.createLikeMessage("123", "123", "123", "123", "123");
-                client.channel.writeAndFlush(codec.encodeProtoMessage(mw));
-            }
-        });
+//        SimpleProtosCodec codec=new SimpleProtosCodec();
+////        codec.setConverterFactory(new ReflectBodyConverterFactory());
+//
+//        client.clientWorker.submit(new Runnable() {
+//            @Override
+//            public void run() {
+//                MessageWrapper mw=MessageWrapperFactory.createLikeMessage("123", "123", "123", "123", "123");
+//                client.channel.writeAndFlush(codec.encodeProtoMessage(mw));
+//            }
+//        });
     }
 }

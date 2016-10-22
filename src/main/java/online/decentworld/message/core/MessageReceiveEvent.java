@@ -43,8 +43,6 @@ public class MessageReceiveEvent {
      */
     private WealthAckMessage wealthAckMessage;
 
-
-
     public WealthAckMessage getWealthAckMessage() {
         return wealthAckMessage;
     }
