@@ -2,8 +2,8 @@
 //
 //import com.lmax.disruptor.RingBuffer;
 //import com.sun.xml.internal.messaging.saaj.util.ByteOutputStream;
-//import online.decentworld.message.core.MessageEventTranslator;
-//import online.decentworld.message.core.MessageReceiveEvent;
+//import online.decentworld.message.core.event.MessageEventTranslator;
+//import online.decentworld.message.core.event.MessageReceiveEvent;
 //import online.decentworld.message.core.ValidateInfo;
 //import online.decentworld.message.core.ValidateType;
 //import online.decentworld.rpc.codc.protos.SimpleProtosCodec;

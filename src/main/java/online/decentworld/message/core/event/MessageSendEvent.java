@@ -1,4 +1,4 @@
-package online.decentworld.message.core;
+package online.decentworld.message.core.event;
 
 import online.decentworld.rpc.dto.message.types.MessageType;
 

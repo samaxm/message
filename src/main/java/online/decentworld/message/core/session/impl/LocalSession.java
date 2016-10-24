@@ -1,6 +1,7 @@
 package online.decentworld.message.core.session.impl;
 
-import online.decentworld.message.core.channel.NettyChannel;
+import online.decentworld.message.core.channel.MessageChannel2;
+import online.decentworld.message.core.channel.LocalNettyChannel;
 import online.decentworld.message.core.session.Session;
 import online.decentworld.message.core.session.SessionStatus;
 import online.decentworld.message.core.sync.Sequences;
@@ -12,7 +13,7 @@ import online.decentworld.message.core.sync.impl.BasicSequences;
 public class LocalSession implements Session {
 
     private String dwID;
-    private NettyChannel channel;
+    private LocalNettyChannel channel;
     private String channllengeString;
     private SessionStatus status;
     private Sequences sequences;
@@ -20,7 +21,7 @@ public class LocalSession implements Session {
     private int outMessageCount;
     private int inMessageCount;
 
-    public LocalSession(String dwID, NettyChannel channel, String channllengeString) {
+    public LocalSession(String dwID, LocalNettyChannel channel, String channllengeString) {
         this.dwID = dwID;
         this.channel = channel;
         this.channllengeString = channllengeString;
@@ -28,6 +29,7 @@ public class LocalSession implements Session {
         this.status=SessionStatus.CHALLENGE;
         this.lastActiveTime=System.currentTimeMillis();
         this.outMessageCount=this.inMessageCount=0;
+        channel.setLocalSession(this);
     }
 
     @Override
@@ -46,7 +48,7 @@ public class LocalSession implements Session {
     }
 
     @Override
-    public NettyChannel getMessageChannel() {
+    public MessageChannel2 getMessageChannel() {
         return channel;
     }
 

@@ -1,7 +1,7 @@
 package online.decentworld.message.core.handlers;
 
 import com.lmax.disruptor.ExceptionHandler;
-import online.decentworld.message.core.MessageReceiveEvent;
+import online.decentworld.message.core.event.MessageReceiveEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

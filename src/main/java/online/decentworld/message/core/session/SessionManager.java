@@ -1,6 +1,6 @@
 package online.decentworld.message.core.session;
 
-import online.decentworld.message.core.channel.NettyChannel;
+import online.decentworld.message.core.channel.LocalNettyChannel;
 import online.decentworld.message.exception.SessionConfictException;
 
 /**
@@ -8,7 +8,7 @@ import online.decentworld.message.exception.SessionConfictException;
  */
 public interface SessionManager {
 
-    public Session createSession(NettyChannel channel);
+    public Session createSession(LocalNettyChannel channel);
 
     public void activeSession(String channelID,String dwID) throws SessionConfictException;
 

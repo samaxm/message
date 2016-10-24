@@ -1,6 +1,6 @@
 package online.decentworld.message.core.session;
 
-import online.decentworld.message.core.channel.NettyChannel;
+import online.decentworld.message.core.channel.MessageChannel2;
 import online.decentworld.message.core.sync.Sequences;
 
 /**
@@ -14,7 +14,7 @@ public interface Session {
 
     String getChanllengeStrign();
 
-    NettyChannel getMessageChannel();
+    MessageChannel2 getMessageChannel();
 
     SessionStatus getSessionStatus();
 

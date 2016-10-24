@@ -2,7 +2,7 @@ package online.decentworld.message.core.handlers;
 
 import com.lmax.disruptor.EventHandler;
 import com.lmax.disruptor.WorkHandler;
-import online.decentworld.message.core.MessageReceiveEvent;
+import online.decentworld.message.core.event.MessageReceiveEvent;
 import online.decentworld.message.core.MessageStatus;
 import online.decentworld.message.security.validate.ValidateStrategy;
 import org.springframework.stereotype.Component;

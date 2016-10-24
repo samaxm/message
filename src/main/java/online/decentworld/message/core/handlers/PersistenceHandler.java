@@ -4,7 +4,7 @@ import com.lmax.disruptor.EventHandler;
 import com.lmax.disruptor.WorkHandler;
 import online.decentworld.charge.ChargeResultCode;
 import online.decentworld.charge.receipt.MessageReceipt;
-import online.decentworld.message.core.MessageReceiveEvent;
+import online.decentworld.message.core.event.MessageReceiveEvent;
 import online.decentworld.message.core.MessageStatus;
 import online.decentworld.message.persist.PersistStrategy;
 import online.decentworld.rpc.dto.message.ChatMessage;
@@ -43,9 +43,7 @@ public class PersistenceHandler implements EventHandler<MessageReceiveEvent>,Wor
         if(status.isValidate()){
             try{
                 WealthAckMessage ackMessage=null;
-                if(messageReceiveEvent.getMsg().getType()== MessageType.CHAT_AUDIO||
-                        messageReceiveEvent.getMsg().getType()== MessageType.CHAT_IMAGE||
-                        messageReceiveEvent.getMsg().getType()== MessageType.CHAT_TEXT) {
+                if(MessageType.isChatMessage(messageReceiveEvent.getMsg().getType())) {
                     //chat message should save ack
                     ChatMessage msg = (ChatMessage) messageReceiveEvent.getMsg().getBody();
                     MessageReceipt receipt = messageReceiveEvent.getMessageReceipt();

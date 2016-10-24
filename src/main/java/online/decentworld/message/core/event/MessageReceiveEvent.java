@@ -1,6 +1,7 @@
-package online.decentworld.message.core;
+package online.decentworld.message.core.event;
 
 import online.decentworld.charge.receipt.MessageReceipt;
+import online.decentworld.message.core.MessageStatus;
 import online.decentworld.message.security.validate.ValidateInfo;
 import online.decentworld.rpc.dto.message.MessageWrapper;
 import online.decentworld.rpc.dto.message.WealthAckMessage;

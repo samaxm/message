@@ -5,6 +5,10 @@ import com.lmax.disruptor.WorkHandler;
 import com.lmax.disruptor.dsl.Disruptor;
 import online.decentworld.message.common.MessageConfig;
 import online.decentworld.message.core.*;
+import online.decentworld.message.core.event.MessageReceiveEvent;
+import online.decentworld.message.core.event.MessageSendEvent;
+import online.decentworld.message.core.event.MessageSendEventTranslateInfo;
+import online.decentworld.message.core.event.SendMessageEventTranslator;
 import online.decentworld.message.http.RequestHolder;
 import online.decentworld.rpc.codc.Codec;
 import online.decentworld.rpc.dto.message.ChatMessage;
@@ -50,9 +54,7 @@ public class DispatcherHandler implements EventHandler<MessageReceiveEvent>,Work
             String sender=messageReceiveEvent.getMsg().getSenderID();
             String receiver=messageReceiveEvent.getMsg().getReceiverID();
             MessageType type=messageReceiveEvent.getMsg().getType();
-            if(messageReceiveEvent.getMsg().getType()== MessageType.CHAT_AUDIO||
-                    messageReceiveEvent.getMsg().getType()== MessageType.CHAT_IMAGE||
-                    messageReceiveEvent.getMsg().getType()== MessageType.CHAT_TEXT){
+            if(MessageType.isChatMessage(messageReceiveEvent.getMsg().getType())){
                 ChatMessage cm=(ChatMessage)messageReceiveEvent.getMsg().getBody();
                 if(status.isPersistSuccessful()){
                     MessageWrapper msg=messageReceiveEvent.getMsg();

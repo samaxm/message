@@ -1,4 +1,4 @@
-package online.decentworld.message.core;
+package online.decentworld.message.core.event;
 
 /**
  * Created by Sammax on 2016/9/7.

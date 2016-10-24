@@ -2,8 +2,8 @@ package online.decentworld.message.mq;
 
 import com.lmax.disruptor.EventTranslatorOneArg;
 import com.lmax.disruptor.dsl.Disruptor;
-import online.decentworld.message.core.MessageReceiveEvent;
-import online.decentworld.message.core.TranslateInfo;
+import online.decentworld.message.core.event.MessageReceiveEvent;
+import online.decentworld.message.core.event.TranslateInfo;
 import online.decentworld.rpc.transfer.aq.AQConnetionHelper;
 import org.apache.activemq.pool.PooledConnection;
 import org.slf4j.Logger;

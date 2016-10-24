@@ -6,10 +6,12 @@ import online.decentworld.cache.config.CacheBeanConfig;
 import online.decentworld.charge.ChargeService;
 import online.decentworld.charge.ChargeServiceTemplate;
 import online.decentworld.message.cache.LocalUserContactCache;
-import online.decentworld.message.core.MessageReceiveEvent;
-import online.decentworld.message.core.MessageSendEvent;
-import online.decentworld.message.core.SendMessageEventTranslator;
+import online.decentworld.message.core.event.MessageDispatchEvent;
+import online.decentworld.message.core.event.MessageReceiveEvent;
+import online.decentworld.message.core.event.MessageSendEvent;
+import online.decentworld.message.core.event.SendMessageEventTranslator;
 import online.decentworld.message.core.handlers.*;
+import online.decentworld.message.core.session.SessionManager;
 import online.decentworld.message.netty.NettyMessageServer;
 import online.decentworld.message.persist.PersistStrategy;
 import online.decentworld.rdb.config.DBConfig;
@@ -80,13 +82,43 @@ public class ApplicationRootConfig {
 		return disruptor;
 	}
 
+
+	@Bean(name = "messageDisruptor_v2")
+	public Disruptor<MessageReceiveEvent> getNettyDisruptor(online.decentworld.charge.ChargeService charger,Disruptor<MessageDispatchEvent> dispatchEventDisruptor
+			,PersistStrategy persistStrategy,LocalUserContactCache localUserContactCache){
+		Executor executor= Executors.newCachedThreadPool();
+		Disruptor<MessageReceiveEvent> disruptor=new Disruptor<MessageReceiveEvent>(MessageReceiveEvent::new,1024,executor);
+		disruptor
+				.handleEventsWith(ChargeHandler.createGroup(4, charger))
+				.thenHandleEventsWithWorkerPool(PersistenceHandler.createGroup(4,persistStrategy))
+				.then(new LogHandler(localUserContactCache))
+				.thenHandleEventsWithWorkerPool(MessageDispatchHandler.createGroup(2, dispatchEventDisruptor))
+				.then(new CleanHandler());
+		disruptor.setDefaultExceptionHandler(new DefaultExceptionHandler());
+		disruptor.start();
+		return disruptor;
+	}
+
 	@Bean(name = "messageSenderDisruptor")
 	public Disruptor<MessageSendEvent> getSenderDisruptor(){
 		Executor executor= Executors.newCachedThreadPool();
 		Disruptor<MessageSendEvent> disruptor=new Disruptor<MessageSendEvent>(MessageSendEvent::new,1024,executor);
-		disruptor.handleEventsWithWorkerPool(DeliverHandler.create(4))
+		disruptor.handleEventsWithWorkerPool(HTTP_DeliverHandler.create(4))
 					.then(new MessageSendEventCleanHandler());
 		disruptor.setDefaultExceptionHandler(new DefaultMessageSendExceptionHandler());
+		disruptor.start();
+		return disruptor;
+	}
+
+
+
+	@Bean(name = "messageDispatchDisruptor")
+	public Disruptor<MessageDispatchEvent> getSenderDisruptorV2(SessionManager sessionManager){
+		Executor executor= Executors.newCachedThreadPool();
+		Disruptor<MessageDispatchEvent> disruptor=new Disruptor<MessageDispatchEvent>(MessageDispatchEvent::new,1024,executor);
+		disruptor.handleEventsWithWorkerPool(MessageRouteHandler.createGroup(4, sessionManager))
+				.then(new MessageDispatchEventCleanHandler());
+		disruptor.setDefaultExceptionHandler(new MessageDispatchExceptionHandler());
 		disruptor.start();
 		return disruptor;
 	}

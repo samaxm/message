@@ -2,7 +2,7 @@ package online.decentworld.message.core.handlers;
 
 import com.lmax.disruptor.EventHandler;
 import com.lmax.disruptor.WorkHandler;
-import online.decentworld.message.core.MessageSendEvent;
+import online.decentworld.message.core.event.MessageSendEvent;
 import online.decentworld.message.http.RequestHolder;
 import online.decentworld.message.http.SendMessageRequest;
 import online.decentworld.message.http.SynchronizeRequest;
@@ -13,9 +13,9 @@ import org.slf4j.LoggerFactory;
 /**
  * Created by Sammax on 2016/9/19.
  */
-public class DeliverHandler implements EventHandler<MessageSendEvent>,WorkHandler<MessageSendEvent>{
+public class HTTP_DeliverHandler implements EventHandler<MessageSendEvent>,WorkHandler<MessageSendEvent>{
 
-    private  static Logger logger= LoggerFactory.getLogger(DeliverHandler.class);
+    private  static Logger logger= LoggerFactory.getLogger(HTTP_DeliverHandler.class);
 
     @Override
     public void onEvent(MessageSendEvent messageSendEvent, long l, boolean b) throws Exception {
@@ -40,10 +40,10 @@ public class DeliverHandler implements EventHandler<MessageSendEvent>,WorkHandle
         }
     }
 
-    public static DeliverHandler[] create(int num){
-        DeliverHandler[] handlers=new DeliverHandler[num];
+    public static HTTP_DeliverHandler[] create(int num){
+        HTTP_DeliverHandler[] handlers=new HTTP_DeliverHandler[num];
         for(int i=0;i<handlers.length;i++){
-            handlers[i]=new DeliverHandler();
+            handlers[i]=new HTTP_DeliverHandler();
         }
         return handlers;
     }

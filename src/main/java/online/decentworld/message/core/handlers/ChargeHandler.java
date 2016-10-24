@@ -7,7 +7,7 @@ import online.decentworld.charge.ChargeService;
 import online.decentworld.charge.charger.P2PChargeResult;
 import online.decentworld.charge.event.PlainMessageChargeEvent;
 import online.decentworld.charge.receipt.MessageReceipt;
-import online.decentworld.message.core.MessageReceiveEvent;
+import online.decentworld.message.core.event.MessageReceiveEvent;
 import online.decentworld.rpc.dto.message.ChatMessage;
 import online.decentworld.rpc.dto.message.types.MessageType;
 import org.slf4j.Logger;
@@ -36,14 +36,12 @@ public class ChargeHandler implements EventHandler<MessageReceiveEvent>,WorkHand
     public void onEvent(MessageReceiveEvent messageReceiveEvent) throws Exception {
         if(messageReceiveEvent.getStatus().isValidate()) {
             //only charge chat
-            if(messageReceiveEvent.getMsg().getType()== MessageType.CHAT_AUDIO||
-                    messageReceiveEvent.getMsg().getType()== MessageType.CHAT_IMAGE||
-                    messageReceiveEvent.getMsg().getType()== MessageType.CHAT_TEXT){
+            if(MessageType.isChatMessage(messageReceiveEvent.getMsg().getType())){
+
                 ChatMessage cm=(ChatMessage)messageReceiveEvent.getMsg().getBody();
                 //check sender and receiver id
                 MessageReceipt receipt = (MessageReceipt)charger.charge(new PlainMessageChargeEvent(cm.getFromID(),cm.getToID()));
                 P2PChargeResult result=receipt.getChargeResult();
-
                 messageReceiveEvent.setMessageReceipt(receipt);
                 if(result.getStatusCode()== ChargeResultCode.SUCCESS) {
                     //set chat message charge related status

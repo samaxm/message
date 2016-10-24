@@ -1,4 +1,4 @@
-package online.decentworld.message.core;
+package online.decentworld.message.core.event;
 
 import com.lmax.disruptor.EventTranslatorOneArg;
 

@@ -3,7 +3,7 @@ package online.decentworld.message.core.handlers;
 import com.lmax.disruptor.EventHandler;
 import com.lmax.disruptor.WorkHandler;
 import online.decentworld.message.cache.LocalUserContactCache;
-import online.decentworld.message.core.MessageReceiveEvent;
+import online.decentworld.message.core.event.MessageReceiveEvent;
 import online.decentworld.rpc.dto.message.ChatMessage;
 import online.decentworld.rpc.dto.message.types.MessageType;
 import org.slf4j.Logger;

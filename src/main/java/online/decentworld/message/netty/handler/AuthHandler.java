@@ -4,7 +4,7 @@ import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import online.decentworld.message.cache.SecurityCache;
-import online.decentworld.message.core.channel.NettyChannel;
+import online.decentworld.message.core.channel.LocalNettyChannel;
 import online.decentworld.message.core.session.Session;
 import online.decentworld.message.core.session.SessionManager;
 import online.decentworld.message.core.session.SessionStatus;
@@ -37,7 +37,7 @@ public class AuthHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
-        Session session=sessionManager.createSession(new NettyChannel(ctx.channel()));
+        Session session=sessionManager.createSession(new LocalNettyChannel(ctx.channel()));
         ctx.channel().attr(SessionKeys.SESSION).set(session);
         ctx.writeAndFlush(MessageWrapper.createSimpleCommand(new AuthChallengeMessage(session.getChanllengeStrign())));
         ctx.fireChannelActive();

@@ -1,6 +1,7 @@
-package online.decentworld.message.core;
+package online.decentworld.message.core.event;
 
 import com.lmax.disruptor.EventTranslatorOneArg;
+import online.decentworld.message.core.MessageStatus;
 import online.decentworld.message.security.validate.HttpSimpleValidateInfo;
 import org.springframework.stereotype.Component;
 
@@ -22,4 +23,5 @@ public class MessageEventTranslator implements EventTranslatorOneArg<MessageRece
         messageReceiveEvent.setInfo(new HttpSimpleValidateInfo(translateInfo.getUserID(),translateInfo.getToken()));
 
     }
+
 }
