@@ -8,12 +8,8 @@ import online.decentworld.message.core.sync.Sequences;
 public class BasicSequences implements Sequences {
 
     private long currentSequenceNum;
-    private long targetSequenceNum;
+    private long lastSetTime;
 
-    @Override
-    public long getTargetSequenceNum() {
-        return 0;
-    }
 
     @Override
     public long getCurrentSequenceNum() {
@@ -21,12 +17,18 @@ public class BasicSequences implements Sequences {
     }
 
     @Override
-    public void setCurrentSequenceNum() {
-
+    public boolean setCurrentSequenceNum(long currentSequenceNum) {
+        if(this.currentSequenceNum>currentSequenceNum){
+            return false;
+        }else{
+            this.currentSequenceNum=currentSequenceNum;
+            this.lastSetTime=System.currentTimeMillis();
+            return true;
+        }
     }
 
     @Override
-    public void setTargetSequenceNum() {
-
+    public long getLastSetTime() {
+        return lastSetTime;
     }
 }

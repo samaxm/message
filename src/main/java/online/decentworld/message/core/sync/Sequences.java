@@ -5,11 +5,9 @@ package online.decentworld.message.core.sync;
  */
 public interface Sequences {
 
-    long getTargetSequenceNum();
-
     long getCurrentSequenceNum();
 
-    void setCurrentSequenceNum();
+    boolean setCurrentSequenceNum(long currentSequenceNum);
 
-    void setTargetSequenceNum();
+    long getLastSetTime();
 }

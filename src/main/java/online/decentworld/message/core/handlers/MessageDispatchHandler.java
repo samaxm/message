@@ -2,13 +2,13 @@ package online.decentworld.message.core.handlers;
 
 import com.lmax.disruptor.EventHandler;
 import com.lmax.disruptor.WorkHandler;
-import com.lmax.disruptor.dsl.Disruptor;
 import online.decentworld.charge.ChargeResultCode;
 import online.decentworld.charge.receipt.MessageReceipt;
 import online.decentworld.message.common.MessageConfig;
 import online.decentworld.message.core.MessageStatus;
-import online.decentworld.message.core.event.MessageDispatchEvent;
 import online.decentworld.message.core.event.MessageReceiveEvent;
+import online.decentworld.message.core.session.Session;
+import online.decentworld.message.core.session.SessionManager;
 import online.decentworld.rpc.dto.message.ChatMessage;
 import online.decentworld.rpc.dto.message.MessageWrapper;
 import online.decentworld.rpc.dto.message.WealthAckMessage;
@@ -22,14 +22,12 @@ import org.slf4j.LoggerFactory;
 public class MessageDispatchHandler implements EventHandler<MessageReceiveEvent>,WorkHandler<MessageReceiveEvent> {
 
     private static Logger logger= LoggerFactory.getLogger(DispatcherHandler.class);
-
-    private Disruptor<MessageDispatchEvent> disruptor;
-
-    public MessageDispatchHandler(Disruptor<MessageDispatchEvent> disruptor) {
-        this.disruptor = disruptor;
+    private SessionManager sessionManager;
+    public MessageDispatchHandler() {
     }
 
-    public MessageDispatchHandler() {
+    public MessageDispatchHandler(SessionManager sessionManager) {
+        this.sessionManager = sessionManager;
     }
 
     @Override
@@ -51,34 +49,38 @@ public class MessageDispatchHandler implements EventHandler<MessageReceiveEvent>
                 if(status.isPersistSuccessful()){
                     WealthAckMessage ackMessage=messageReceiveEvent.getWealthAckMessage();
                     if(ackMessage.isChargeSuccess()){
-                        disruptor.publishEvent((MessageDispatchEvent event,long index)->{
-                            event.setReceiverID(receiver);
-                            event.setMessage(messageReceiveEvent.getMsg());
-                        });
+                        Session receiverSession=sessionManager.getSession(receiver);
+                        if(receiverSession!=null){
+                            receiverSession.getMessageChannel().write(messageReceiveEvent.getMsg());
+                        }
                     }
                     MessageWrapper ack=MessageWrapper.createMessageWrapper(MessageConfig.SYSTEM_MESSAGE_SENDER,cm.getFromID(),
                             new WealthAckMessage(cm.getTempID(),mid,receipt.getChargeResult().getPayerWealth(),
                                     receipt.getChargeResult().getStatusCode()== ChargeResultCode.SUCCESS?true:false,receipt.getChatRelation(),receipt.getChatStatus()),mid);
-                    disruptor.publishEvent((MessageDispatchEvent event,long index)->{
-                        event.setReceiverID(sender);
-                        event.setMessage(ack);
-                    });
+                    Session senderSession=sessionManager.getSession(sender);
+                    if(senderSession!=null){
+                        senderSession.getMessageChannel().write(ack);
+                    }
                 }
             }else{
-                disruptor.publishEvent((MessageDispatchEvent event,long index)->{
-                    event.setReceiverID(receiver);
-                    event.setMessage(messageReceiveEvent.getMsg());
-                });
+                Session receiverSession=sessionManager.getSession(receiver);
+                if(receiverSession!=null){
+                    receiverSession.getMessageChannel().write(messageReceiveEvent.getMsg());
+                }
             }
         }
 
     }
 
-    public static MessageDispatchHandler[] createGroup(int size,Disruptor<MessageDispatchEvent> disruptor){
+    public static MessageDispatchHandler[] createGroup(int size,SessionManager sessionManager){
         MessageDispatchHandler[] group=new MessageDispatchHandler[size];
         for(int i=0;i<size;i++){
-            group[i]=new MessageDispatchHandler(disruptor);
+            group[i]=new MessageDispatchHandler(sessionManager);
         }
         return group;
+    }
+
+    public void setSessionManager(SessionManager sessionManager) {
+        this.sessionManager = sessionManager;
     }
 }

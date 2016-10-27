@@ -1,11 +1,9 @@
 package online.decentworld.message.core.session.impl;
 
-import online.decentworld.message.core.channel.MessageChannel2;
 import online.decentworld.message.core.channel.LocalNettyChannel;
+import online.decentworld.message.core.channel.MessageChannel2;
 import online.decentworld.message.core.session.Session;
 import online.decentworld.message.core.session.SessionStatus;
-import online.decentworld.message.core.sync.Sequences;
-import online.decentworld.message.core.sync.impl.BasicSequences;
 
 /**
  * Created by Sammax on 2016/10/20.
@@ -16,7 +14,7 @@ public class LocalSession implements Session {
     private LocalNettyChannel channel;
     private String channllengeString;
     private SessionStatus status;
-    private Sequences sequences;
+    private long latSyncTime;
     private long lastActiveTime;
     private int outMessageCount;
     private int inMessageCount;
@@ -25,7 +23,7 @@ public class LocalSession implements Session {
         this.dwID = dwID;
         this.channel = channel;
         this.channllengeString = channllengeString;
-        this.sequences=new BasicSequences();
+        this.latSyncTime=0;
         this.status=SessionStatus.CHALLENGE;
         this.lastActiveTime=System.currentTimeMillis();
         this.outMessageCount=this.inMessageCount=0;
@@ -63,8 +61,13 @@ public class LocalSession implements Session {
     }
 
     @Override
-    public Sequences getSequences() {
-        return sequences;
+    public long getLastSyncTime() {
+        return latSyncTime;
+    }
+
+    @Override
+    public void setLastSyncTime() {
+        this.latSyncTime=System.currentTimeMillis();
     }
 
     @Override

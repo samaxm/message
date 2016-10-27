@@ -6,6 +6,8 @@ import online.decentworld.message.core.session.impl.LocalSession;
 import online.decentworld.rpc.dto.message.MessageWrapper;
 import online.decentworld.rpc.dto.message.types.MessageType;
 
+import java.util.List;
+
 /**
  * Created by Sammax on 2016/10/20.
  */
@@ -37,6 +39,25 @@ public class LocalNettyChannel implements MessageChannel2 {
 
     public LocalSession getLocalSession() {
         return localSession;
+    }
+
+    public void batchWriteRaw(List<byte[]> data){
+        if(data==null){
+            return;
+        }
+        if(channel.eventLoop().inEventLoop()) {
+            data.forEach((byte[] msg) -> {
+                channel.write(msg);
+            });
+            channel.flush();
+        }else{
+            channel.eventLoop().submit(()->{
+                data.forEach((byte[] msg) -> {
+                    channel.write(msg);
+                });
+                channel.flush();
+            });
+        }
     }
 
     public void setLocalSession(LocalSession localSession) {

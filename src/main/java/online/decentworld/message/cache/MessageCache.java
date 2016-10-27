@@ -67,13 +67,16 @@ public class MessageCache extends RedisTemplate {
             //get unread messageIDs
             Set<String> newMessageIDs = jedis.zrangeByScore(MessageCacheKey.getUserMessageCacheKey(dwID), synchronizeNum+1, Integer.MAX_VALUE);
             //remove readed messageIDs and store to set waiting for db save task
-            Set<String> readedMessageIDs=jedis.zrangeByScore(MessageCacheKey.getUserMessageCacheKey(dwID), 0, synchronizeNum);
-            if(readedMessageIDs.size()!=0) {
-                String[] readedIds = readedMessageIDs.toArray(new String[readedMessageIDs.size()]);
-                jedis.zrem(MessageCacheKey.getUserMessageCacheKey(dwID), readedIds);
-                jedis.sadd(MessageCacheKey.MESSSAGE_STORE_SET, readedIds);
+            if(synchronizeNum!=0){
+                Set<String> readedMessageIDs=jedis.zrangeByScore(MessageCacheKey.getUserMessageCacheKey(dwID), 0, synchronizeNum);
+                if(readedMessageIDs.size()!=0) {
+                    String[] readedIds = readedMessageIDs.toArray(new String[readedMessageIDs.size()]);
+                    jedis.zrem(MessageCacheKey.getUserMessageCacheKey(dwID), readedIds);
+                    jedis.sadd(MessageCacheKey.MESSSAGE_STORE_SET, readedIds);
+                }
             }
-            List<byte[]> msgs=null;
+
+            List<byte[]> msgs;
             msgs=getFromHSETBytes(MessageCacheKey.MESSAGE,newMessageIDs,jedis);
             MessageSynchronizeResult newMessages = new MessageSynchronizeResult(msgs);
             return ReturnResult.result(newMessages);

@@ -13,9 +13,9 @@ import org.slf4j.LoggerFactory;
 /**
  * Created by Sammax on 2016/9/19.
  */
-public class HTTP_DeliverHandler implements EventHandler<MessageSendEvent>,WorkHandler<MessageSendEvent>{
+public class DeliverHandler implements EventHandler<MessageSendEvent>,WorkHandler<MessageSendEvent>{
 
-    private  static Logger logger= LoggerFactory.getLogger(HTTP_DeliverHandler.class);
+    private  static Logger logger= LoggerFactory.getLogger(DeliverHandler.class);
 
     @Override
     public void onEvent(MessageSendEvent messageSendEvent, long l, boolean b) throws Exception {
@@ -40,10 +40,10 @@ public class HTTP_DeliverHandler implements EventHandler<MessageSendEvent>,WorkH
         }
     }
 
-    public static HTTP_DeliverHandler[] create(int num){
-        HTTP_DeliverHandler[] handlers=new HTTP_DeliverHandler[num];
+    public static DeliverHandler[] create(int num){
+        DeliverHandler[] handlers=new DeliverHandler[num];
         for(int i=0;i<handlers.length;i++){
-            handlers[i]=new HTTP_DeliverHandler();
+            handlers[i]=new DeliverHandler();
         }
         return handlers;
     }

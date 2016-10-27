@@ -4,7 +4,6 @@ import online.decentworld.message.core.channel.MessageChannel2;
 import online.decentworld.message.core.channel.OfflineMessageChannel;
 import online.decentworld.message.core.session.Session;
 import online.decentworld.message.core.session.SessionStatus;
-import online.decentworld.message.core.sync.Sequences;
 import online.decentworld.message.util.MessagePusher;
 
 /**
@@ -55,7 +54,12 @@ public class OfflineSession implements Session {
     }
 
     @Override
-    public Sequences getSequences() {
+    public long getLastSyncTime() {
+        throw new UnsupportedOperationException("remote session don't support");
+    }
+
+    @Override
+    public void setLastSyncTime() {
         throw new UnsupportedOperationException("remote session don't support");
     }
 

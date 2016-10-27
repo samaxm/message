@@ -34,6 +34,7 @@ public class AsynchronizedHttpChannel implements MessageChannel {
             outputStream=ctx.getResponse().getOutputStream();
             outputStream.write(data);
             outputStream.flush();
+            ctx.complete();
         }catch (Exception e){
             logger.debug("[WRITE_FAILED] dwID#"+dwID,e);
         }finally {
