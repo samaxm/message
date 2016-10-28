@@ -23,23 +23,30 @@ public class DefaultChannelInitiallizer extends ChannelInitializer<NioSocketChan
     private Codec codec;
     @Resource(name = "authHandler")
     private ChannelHandler authHandler;
+    @Resource(name="chatMessageHandler")
+    private ChannelHandler chatMessageHandler;
+    @Resource(name="exceptionHandler")
+    private ChannelHandler exceptionHandler;
+    @Resource(name="debugHandler")
+    private ChannelHandler debugHandler;
+    @Resource(name="pingMessageHandler")
+    private ChannelHandler pingMessageHandler;
+    @Resource(name="syncCommandHandler")
+    private ChannelHandler syncCommandHandler;
 
 
     @Override
     protected void initChannel(NioSocketChannel ch) throws Exception {
-        ch.pipeline().addLast(new DebugLogHandler());
+        ch.pipeline().addLast(debugHandler);
         ch.pipeline().addLast(new ProtobufVarint32FrameDecoder());
         ch.pipeline().addLast(new NettyChannelDecoder(codec));
-//      ch.pipeline().addLast(new ProtobufEncoder());
         ch.pipeline().addLast(new ProtobufVarint32LengthFieldPrepender());
         ch.pipeline().addLast(new NettyChannelEncoder(codec));
         ch.pipeline().addLast(authHandler);
-//      ch.pipeline().addLast(new TestHandler());
-    }
-
-
-    public void setCodec(Codec codec) {
-        this.codec = codec;
+        ch.pipeline().addLast(chatMessageHandler);
+        ch.pipeline().addLast(pingMessageHandler);
+        ch.pipeline().addLast(syncCommandHandler);
+        ch.pipeline().addLast(exceptionHandler);
     }
 }
 

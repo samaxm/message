@@ -1,7 +1,6 @@
-import online.decentworld.charge.service.IChargeService;
 import online.decentworld.message.cache.LocalUserContactCache;
 import online.decentworld.message.config.ApplicationRootConfig;
-import online.decentworld.rdb.config.DBConfig;
+import online.decentworld.rpc.dto.message.types.ChatRelation;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
@@ -15,11 +14,10 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
  */
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes={DBConfig.class, ApplicationRootConfig.class})
+@ContextConfiguration(classes={ApplicationRootConfig.class})
 public class SpringTest {
 
-    @Autowired
-    private IChargeService chargeService;
+
     @Autowired
     private LocalUserContactCache chatCache;
 
@@ -28,5 +26,9 @@ public class SpringTest {
 
     @Test
     public void test() throws InterruptedException {
+        Thread.sleep(15000);
+        for(int i=0;i<10;i++){
+            chatCache.checkContacts("123", "4656", ChatRelation.FRIEND);
+        }
     }
 }

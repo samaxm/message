@@ -11,9 +11,13 @@ import online.decentworld.message.core.session.SessionStatus;
 public class LocalSession implements Session {
 
     private String dwID;
+
     private LocalNettyChannel channel;
+
     private String channllengeString;
+
     private SessionStatus status;
+
     private long latSyncTime;
     private long lastActiveTime;
     private int outMessageCount;
@@ -76,8 +80,9 @@ public class LocalSession implements Session {
     }
 
     @Override
-    public long setActiveTime(long time) {
-        return lastActiveTime=time;
+    public long activeSession() {
+        this.lastActiveTime=System.currentTimeMillis();
+        return lastActiveTime;
     }
 
     @Override
@@ -98,5 +103,10 @@ public class LocalSession implements Session {
     @Override
     public int increaseInMessageCount() {
         return inMessageCount++;
+    }
+
+    @Override
+    public void closeSession() {
+        this.channel.getChannel().close();
     }
 }

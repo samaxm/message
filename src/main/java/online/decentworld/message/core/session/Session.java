@@ -25,7 +25,7 @@ public interface Session {
 
     long getLastActiveTime();
 
-    long setActiveTime(long time);
+    long activeSession();
 
     int getOutMessageCount();
 
@@ -34,5 +34,7 @@ public interface Session {
     int getInMessageCount();
 
     int increaseInMessageCount();
+
+    void closeSession();
 
 }

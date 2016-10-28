@@ -39,8 +39,9 @@ public class LogHandler implements EventHandler<MessageReceiveEvent>,WorkHandler
         if(messageReceiveEvent.getMsg().getType()== MessageType.CHAT_AUDIO||
                 messageReceiveEvent.getMsg().getType()== MessageType.CHAT_IMAGE||
                 messageReceiveEvent.getMsg().getType()== MessageType.CHAT_TEXT){
-            ChatMessage cm=(ChatMessage)messageReceiveEvent.getMsg().getBody();
-            userContactCache.checkContacts(cm.getToID(), cm.getFromID(), cm.getRelation());
+//            if(messageReceiveEvent.getMessageReceipt().getChargeResult().getStatusCode()= ChargeResultCode.SUCCESS)
+                ChatMessage cm=(ChatMessage)messageReceiveEvent.getMsg().getBody();
+                userContactCache.checkContacts(cm.getToID(), cm.getFromID(), cm.getRelation());
         }
     }
 

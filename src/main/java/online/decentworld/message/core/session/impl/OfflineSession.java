@@ -69,7 +69,7 @@ public class OfflineSession implements Session {
     }
 
     @Override
-    public long setActiveTime(long time) {
+    public long activeSession() {
         throw new UnsupportedOperationException("remote session don't support");
     }
 
@@ -90,5 +90,11 @@ public class OfflineSession implements Session {
     @Override
     public int increaseInMessageCount() {
         throw new UnsupportedOperationException("remote session don't support");
+    }
+
+    @Override
+    public void closeSession() {
+        throw new UnsupportedOperationException("remote session don't support");
+
     }
 }

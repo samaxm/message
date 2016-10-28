@@ -15,4 +15,6 @@ public interface SessionManager {
     public void receiveSessionPing(String dwID);
 
     public Session getSession(String dwID);
+
+    public void removeSession(String dwID);
 }

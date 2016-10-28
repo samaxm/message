@@ -17,7 +17,7 @@ import org.springframework.stereotype.Component;
  * Created by Sammax on 2016/10/22.
  */
 @ChannelHandler.Sharable
-@Component
+@Component(value = "syncCommandHandler")
 public class SyncCommandHandler extends ChannelInboundHandlerAdapter {
 
 

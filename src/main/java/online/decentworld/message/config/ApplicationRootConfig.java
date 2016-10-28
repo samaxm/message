@@ -28,7 +28,6 @@ import online.decentworld.rpc.transfer.Sender;
 import online.decentworld.rpc.transfer.aq.PooledActiveMQSender;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.*;
 import org.springframework.context.annotation.ComponentScan.Filter;
@@ -50,16 +49,12 @@ import java.util.concurrent.Executors;
 		@Filter(type=FilterType.ANNOTATION,value=EnableWebMvc.class)
 })
 @EnableTransactionManagement
-@Import(value = {DBConfig.class,CacheBeanConfig.class})
 @EnableCaching
+@Import(value = {DBConfig.class,CacheBeanConfig.class})
 public class ApplicationRootConfig {
 	
 	@SuppressWarnings("unused")
 	private static Logger logger=LoggerFactory.getLogger(ApplicationRootConfig.class);
-
-	@Autowired
-	private PersistStrategy persistStrategy;
-
 
 	@Bean
 	public DataSourceTransactionManager getTXManager(DataSource ds){
@@ -167,4 +162,7 @@ public class ApplicationRootConfig {
 		sender.setCodec(codec);
 		return sender;
 	}
+
+
+
 }

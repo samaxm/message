@@ -16,16 +16,23 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 /**
  * Created by Sammax on 2016/10/22.
  */
 @Service
 public class SessionManagerImpl implements SessionManager {
-    @Autowired
-    private Sender sender;
+
     private static Logger logger= LoggerFactory.getLogger(LocalSession.class);
+    private static long MAX_IDLE_TIME=8*60*1000;
     private SortedList<Session> tempSessions=new SortedList<>();
     private SortedList<Session> activeSession=new SortedList<>();
+
+
+    @Autowired
+    private Sender sender;
+
     @Autowired
     private SessionCache sessionCache;
     @Autowired
@@ -51,7 +58,7 @@ public class SessionManagerImpl implements SessionManager {
         if(!sessionCache.cacheUserConnDomain(dwID, Common.DOMAIN)){
             throw new SessionConfictException(dwID);
         }else{
-            session.setActiveTime(System.currentTimeMillis());
+            session.activeSession();
             session.setIdentity(dwID);
             session.setSessionStatus(SessionStatus.ACTIVE);
             activeSession.addTimelineElement(dwID,session);
@@ -80,4 +87,18 @@ public class SessionManagerImpl implements SessionManager {
         return session;
     }
 
+    @Override
+    public void removeSession(String dwID) {
+        activeSession.removeByKey(dwID);
+    }
+
+
+    public void checkIdleSession(){
+        List<Session> idleSession=activeSession.getRangeByRank(0,System.currentTimeMillis()-MAX_IDLE_TIME);
+        if(idleSession!=null){
+            idleSession.forEach((Session session)->{
+                session.closeSession();
+            });
+        }
+    }
 }

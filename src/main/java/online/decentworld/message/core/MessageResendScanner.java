@@ -34,12 +34,14 @@ public class MessageResendScanner {
                 public void run() {
                     while(true) {
                         MessageSendTimeNode node = timeline.peek();
+                        if(node==null){
+                            break;
+                        }
                         long sendTime=node.getTimestamp();
                         if(System.currentTimeMillis()-sendTime<MAX_DELAY){
                             break;
                         }
                         node=timeline.poll();
-                        long sendSyncNum=node.getSyncNum();
                         if(sendTime-node.getSession().getLastSyncTime()>MAX_DELAY){
                             resend(node);
                         }

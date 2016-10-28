@@ -3,12 +3,15 @@ package online.decentworld.message.netty.handler;
 import io.netty.channel.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
 
 import java.net.SocketAddress;
 
 /**
  * Created by Sammax on 2016/10/15.
  */
+@ChannelHandler.Sharable
+@Service(value = "debugHandler")
 public class DebugLogHandler extends ChannelHandlerAdapter implements ChannelInboundHandler,ChannelOutboundHandler
 {
 
