@@ -5,7 +5,6 @@ import com.lmax.disruptor.dsl.Disruptor;
 import online.decentworld.message.config.Common;
 import online.decentworld.message.core.event.MessageReceiveEvent;
 import online.decentworld.message.core.event.TranslateInfo;
-import online.decentworld.rpc.dto.api.StatusCode;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -70,8 +69,26 @@ public class MessageController {
                     disruptor.publishEvent(translator,info);
 
                 }else {
-                    logger.debug("[ERROR_DATA_FORMAT]");
-                    response.setStatus(StatusCode.FAILED);
+                    if(logger.isDebugEnabled()) {
+                        StringBuilder stringBuilder = new StringBuilder();
+                        if (token == null) {
+                            stringBuilder.append("token is null");
+                        }
+                        if (data == null) {
+                            stringBuilder.append("data is null");
+                        }
+                        if (tempID == null) {
+                            stringBuilder.append("tempID is null");
+                        }
+                        if (userID == null) {
+                            stringBuilder.append("userID is null");
+                        }
+                        logger.debug("[ERROR_DATA_FORMAT] #"+stringBuilder.toString());
+                    }
+                    response.setStatus(400);
+
+//                    response.getWriter().write(stringBuilder.toString().toCharArray());
+//                    response.getWriter().flush();
                 }
             }
         } catch (Exception e) {

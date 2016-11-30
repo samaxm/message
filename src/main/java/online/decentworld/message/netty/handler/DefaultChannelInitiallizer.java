@@ -38,7 +38,7 @@ public class DefaultChannelInitiallizer extends ChannelInitializer<NioSocketChan
     @Override
     protected void initChannel(NioSocketChannel ch) throws Exception {
         ch.pipeline().addLast(debugHandler);
-        ch.pipeline().addLast(new ProtobufVarint32FrameDecoder());
+        ch.pipeline().addLast();
         ch.pipeline().addLast(new NettyChannelDecoder(codec));
         ch.pipeline().addLast(new ProtobufVarint32LengthFieldPrepender());
         ch.pipeline().addLast(new NettyChannelEncoder(codec));

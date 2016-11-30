@@ -17,9 +17,7 @@ import online.decentworld.message.core.session.SessionManager;
 import online.decentworld.message.netty.NettyMessageServer;
 import online.decentworld.message.persist.PersistStrategy;
 import online.decentworld.rdb.config.DBConfig;
-import online.decentworld.rdb.mapper.ConsumePriceMapper;
-import online.decentworld.rdb.mapper.OrderMapper;
-import online.decentworld.rdb.mapper.WealthMapper;
+import online.decentworld.rdb.mapper.*;
 import online.decentworld.rpc.codc.Codec;
 import online.decentworld.rpc.codc.MessageConverterFactory;
 import online.decentworld.rpc.codc.ReflectConverterFactory;
@@ -141,8 +139,8 @@ public class ApplicationRootConfig {
 
 
 	@Bean
-	public ChargeService getChargeService(WealthMapper wealthMapper,ConsumePriceMapper consumePriceMapper,OrderMapper orderMapper){
-		return ChargeServiceTemplate.defaultService(wealthMapper,consumePriceMapper,orderMapper);
+	public ChargeService getChargeService(WealthMapper wealthMapper,ConsumePriceMapper consumePriceMapper,OrderMapper orderMapper,TransferHistoryMapper transferHistoryMapper,TipRecordsMapper tipRecordsMapper){
+		return ChargeServiceTemplate.defaultService(wealthMapper,consumePriceMapper,orderMapper,transferHistoryMapper,tipRecordsMapper);
 	}
 
 	@Resource(name = "defaultChannelInitiallizer")

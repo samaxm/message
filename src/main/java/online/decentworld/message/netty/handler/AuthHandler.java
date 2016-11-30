@@ -39,6 +39,7 @@ public class AuthHandler extends ChannelInboundHandlerAdapter {
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
         Session session=sessionManager.createSession(new LocalNettyChannel(ctx.channel()));
         ChannelAttributeHelper.setSession(ctx, session);
+        ChannelAttributeHelper.needLengthDecode(ctx, true);
         ctx.writeAndFlush(MessageWrapper.createSimpleCommand(new AuthChallengeMessage(session.getChanllengeStrign())));
         ctx.fireChannelActive();
     }
