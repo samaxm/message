@@ -41,7 +41,7 @@ public class MessageCache extends RedisTemplate {
             if(ack!=null) {
                 //cache temp wealth ack for recheck
                 ack.setMid(id);
-                byte[] wealth_ack = codec.encode(new MessageWrapper("SYSTEM_MESSAGE_SENDER", msg.getReceiverID(), MessageType.NOTICE_LIKE, ack,time,id));
+                byte[] wealth_ack = codec.encode(new MessageWrapper("SYSTEM_MESSAGE_SENDER", msg.getReceiverID(), MessageType.COMMAND_WEALTH_ACK, ack,time,id));
                 jedis.setex(((ChatMessage) msg.getBody()).getTempID().getBytes(), MessageCacheConfig.WEALTH_ACK_SECONDS, wealth_ack);
             }
             if(ack==null||ack.isChargeSuccess()){

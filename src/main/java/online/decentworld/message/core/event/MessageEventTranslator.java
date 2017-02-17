@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 /**
  * Created by Sammax on 2016/9/7.
  */
-@Component(value = "messageEventTranslator")
+@Component(value = "messageReceiveEventTranslator")
 public class MessageEventTranslator implements EventTranslatorOneArg<MessageReceiveEvent,TranslateInfo>
 {
 

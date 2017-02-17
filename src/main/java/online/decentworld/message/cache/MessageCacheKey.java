@@ -9,7 +9,7 @@ import online.decentworld.cache.redis.CacheKey;
  */
 public class MessageCacheKey extends CacheKey{
 
-    private static String CHAT_CACHE_PREFIX="chat";
+    private static String CHAT_CACHE_PREFIX="ps";
 
     private static String CONSUMEABLE_MESSAGE_CACHE_PREFIX="mailbox";
 

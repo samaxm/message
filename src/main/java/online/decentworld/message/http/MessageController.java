@@ -30,7 +30,7 @@ public class MessageController {
 
     @Resource(name = "messageDisruptor")
     private Disruptor<MessageReceiveEvent> disruptor;
-    @Resource(name="messageEventTranslator")
+    @Resource(name="messageReceiveEventTranslator")
     private EventTranslatorOneArg translator;
 
     @Autowired

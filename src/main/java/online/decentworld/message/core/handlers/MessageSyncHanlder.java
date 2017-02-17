@@ -18,6 +18,14 @@ import online.decentworld.rpc.dto.message.types.MessageType;
 public class MessageSyncHanlder implements EventHandler<MessageSyncEvent>,WorkHandler<MessageSyncEvent> {
 
 
+    public MessageCache getMessageCache() {
+        return messageCache;
+    }
+
+    public MessageResendScanner getScanner() {
+        return scanner;
+    }
+
     private MessageCache messageCache;
     private MessageResendScanner scanner;
 
@@ -57,7 +65,10 @@ public class MessageSyncHanlder implements EventHandler<MessageSyncEvent>,WorkHa
     public static MessageSyncHanlder[] createGroup(int size,MessageCache messageCache,MessageResendScanner messageResendScanner){
         MessageSyncHanlder[] group=new MessageSyncHanlder[size];
         for(int i=0;i<size;i++){
-            group[i]=new MessageSyncHanlder(messageCache,messageResendScanner);
+            MessageSyncHanlder hanlder =new MessageSyncHanlder();
+            hanlder.setMessageCache(messageCache);
+            hanlder.setScanner(messageResendScanner);
+            group[i]=hanlder;
         }
         return group;
     }

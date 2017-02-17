@@ -1,10 +1,7 @@
 package online.decentworld.message.config;
 
 import com.lmax.disruptor.dsl.Disruptor;
-import io.netty.channel.ChannelInitializer;
 import online.decentworld.cache.config.CacheBeanConfig;
-import online.decentworld.charge.ChargeService;
-import online.decentworld.charge.ChargeServiceTemplate;
 import online.decentworld.message.cache.LocalUserContactCache;
 import online.decentworld.message.cache.MessageCache;
 import online.decentworld.message.core.MessageResendScanner;
@@ -14,10 +11,8 @@ import online.decentworld.message.core.event.MessageSyncEvent;
 import online.decentworld.message.core.event.SendMessageEventTranslator;
 import online.decentworld.message.core.handlers.*;
 import online.decentworld.message.core.session.SessionManager;
-import online.decentworld.message.netty.NettyMessageServer;
 import online.decentworld.message.persist.PersistStrategy;
 import online.decentworld.rdb.config.DBConfig;
-import online.decentworld.rdb.mapper.*;
 import online.decentworld.rpc.codc.Codec;
 import online.decentworld.rpc.codc.MessageConverterFactory;
 import online.decentworld.rpc.codc.ReflectConverterFactory;
@@ -26,6 +21,7 @@ import online.decentworld.rpc.transfer.Sender;
 import online.decentworld.rpc.transfer.aq.PooledActiveMQSender;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.*;
 import org.springframework.context.annotation.ComponentScan.Filter;
@@ -33,7 +29,6 @@ import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
-import javax.annotation.Resource;
 import javax.sql.DataSource;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -43,7 +38,7 @@ import java.util.concurrent.Executors;
  * @author Sammax
  */
 @Configuration
-@ComponentScan(basePackages={"online.decentworld.message.*"},excludeFilters={
+@ComponentScan(basePackages={"online.decentworld.*"},excludeFilters={
 		@Filter(type=FilterType.ANNOTATION,value=EnableWebMvc.class)
 })
 @EnableTransactionManagement
@@ -53,6 +48,10 @@ public class ApplicationRootConfig {
 	
 	@SuppressWarnings("unused")
 	private static Logger logger=LoggerFactory.getLogger(ApplicationRootConfig.class);
+	@Autowired
+	private  MessageCache messageCache;
+	@Autowired
+	private MessageResendScanner messageResendScanner;
 
 	@Bean
 	public DataSourceTransactionManager getTXManager(DataSource ds){
@@ -83,16 +82,6 @@ public class ApplicationRootConfig {
 		return disruptor;
 	}
 
-	@Bean(name = "messageSenderDisruptor")
-	public Disruptor<MessageSendEvent> getSenderDisruptor(){
-		Executor executor= Executors.newCachedThreadPool();
-		Disruptor<MessageSendEvent> disruptor=new Disruptor<MessageSendEvent>(MessageSendEvent::new,1024,executor);
-		disruptor.handleEventsWithWorkerPool(DeliverHandler.create(4))
-					.then(new MessageSendEventCleanHandler());
-		disruptor.setDefaultExceptionHandler(new DefaultMessageSendExceptionHandler());
-		disruptor.start();
-		return disruptor;
-	}
 
 	/**
 	 * 2.0 netty channel base
@@ -113,8 +102,21 @@ public class ApplicationRootConfig {
 		return disruptor;
 	}
 
+
+
+	@Bean(name = "messageSenderDisruptor")
+	public Disruptor<MessageSendEvent> getSenderDisruptor(){
+		Executor executor= Executors.newCachedThreadPool();
+		Disruptor<MessageSendEvent> disruptor=new Disruptor<MessageSendEvent>(MessageSendEvent::new,1024,executor);
+		disruptor.handleEventsWithWorkerPool(DeliverHandler.create(4))
+				.then(new MessageSendEventCleanHandler());
+		disruptor.setDefaultExceptionHandler(new DefaultMessageSendExceptionHandler());
+		disruptor.start();
+		return disruptor;
+	}
+
 	@Bean(name = "messageSyncDisruptor")
-	public Disruptor<MessageSyncEvent> getMessageSyncDisruptor(MessageCache messageCache,MessageResendScanner messageResendScanner){
+	public Disruptor<MessageSyncEvent> getMessageSyncDisruptor(){
 		Executor executor= Executors.newCachedThreadPool();
 		Disruptor<MessageSyncEvent> disruptor=new Disruptor<MessageSyncEvent>(MessageSyncEvent::new,1024,executor);
 		disruptor.handleEventsWithWorkerPool(MessageSyncHanlder.createGroup(2, messageCache,messageResendScanner))
@@ -137,22 +139,16 @@ public class ApplicationRootConfig {
 		return new ReflectConverterFactory();
 	}
 
+//	@Resource(name = "defaultChannelInitiallizer")
+//	private ChannelInitializer defaultChannelInitiallizer;
 
-	@Bean
-	public ChargeService getChargeService(WealthMapper wealthMapper,ConsumePriceMapper consumePriceMapper,OrderMapper orderMapper,TransferHistoryMapper transferHistoryMapper,TipRecordsMapper tipRecordsMapper){
-		return ChargeServiceTemplate.defaultService(wealthMapper,consumePriceMapper,orderMapper,transferHistoryMapper,tipRecordsMapper);
-	}
-
-	@Resource(name = "defaultChannelInitiallizer")
-	private ChannelInitializer defaultChannelInitiallizer;
-
-	@Bean
-	public NettyMessageServer startNettyMessageServer(){
-		NettyMessageServer nettyMessageServer=new NettyMessageServer();
-		nettyMessageServer.setInitializer(defaultChannelInitiallizer);
-		nettyMessageServer.start();
-		return nettyMessageServer;
-	}
+//	@Bean
+//	public NettyMessageServer startNettyMessageServer(){
+//		NettyMessageServer nettyMessageServer=new NettyMessageServer();
+//		nettyMessageServer.setInitializer(defaultChannelInitiallizer);
+//		nettyMessageServer.start();
+//		return nettyMessageServer;
+//	}
 
 	@Bean
 	public Sender getSender(Codec codec){
